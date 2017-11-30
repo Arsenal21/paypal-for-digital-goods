@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name:       PayPal for Digital Goods
  * Description:       This plugin allows you to generate a customizable PayPal payment button that lets user pay instantly in a popup via PayPal.
@@ -10,22 +11,22 @@
  * License:           GPL2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */
+if ( ! defined( 'ABSPATH' ) )
+    exit; //Exit if accessed directly
 
-if (!defined('ABSPATH'))exit; //Exit if accessed directly
-
-if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start();
+if ( version_compare( PHP_VERSION, '5.4.0' ) >= 0 ) {
+    if ( session_status() == PHP_SESSION_NONE ) {
+	session_start();
     }
 } else {
-    if (session_id() == '') {
-        session_start();
+    if ( session_id() == '' ) {
+	session_start();
     }
 }
 
-/*----------------------------------------------------------------------------*
+/* ----------------------------------------------------------------------------*
  * Public-Facing Functionality
- *----------------------------------------------------------------------------*/
+ * ---------------------------------------------------------------------------- */
 
 require_once( plugin_dir_path( __FILE__ ) . 'public/class-ppdg.php' );
 require_once( plugin_dir_path( __FILE__ ) . 'public/includes/class-shortcode-ppdg.php' );
@@ -45,9 +46,9 @@ register_deactivation_hook( __FILE__, array( 'PPDG', 'deactivate' ) );
 add_action( 'plugins_loaded', array( 'PPDG', 'get_instance' ) );
 add_action( 'plugins_loaded', array( 'PPDGShortcode', 'get_instance' ) );
 
-/*----------------------------------------------------------------------------*
+/* ----------------------------------------------------------------------------*
  * Dashboard and Administrative Functionality
- *----------------------------------------------------------------------------*/
+ * ---------------------------------------------------------------------------- */
 
 /*
  * If you want to include Ajax within the dashboard, change the following
@@ -61,7 +62,6 @@ add_action( 'plugins_loaded', array( 'PPDGShortcode', 'get_instance' ) );
  */
 if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
 
-	require_once( plugin_dir_path( __FILE__ ) . 'admin/class-ppdg-admin.php' );
-	add_action( 'plugins_loaded', array( 'PPDG_Admin', 'get_instance' ) );
-
+    require_once( plugin_dir_path( __FILE__ ) . 'admin/class-ppdg-admin.php' );
+    add_action( 'plugins_loaded', array( 'PPDG_Admin', 'get_instance' ) );
 }

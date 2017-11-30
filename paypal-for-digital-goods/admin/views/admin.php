@@ -5,22 +5,22 @@
  * This includes the header, options, and other information that should provide
  * The User Interface to the end user.
  */
-if(!current_user_can('manage_options')){
-    wp_die('You do not have permission to access this settings page.');
+if ( ! current_user_can( 'manage_options' ) ) {
+    wp_die( 'You do not have permission to access this settings page.' );
 }
 ?>
 
 <div class="wrap">
 
-	<h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
+    <h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
 
-	<form method="post" action="options.php">
+    <form method="post" action="options.php">
 
-		<?php settings_fields( 'ppdg-settings-group' ); ?>
+	<?php settings_fields( 'ppdg-settings-group' ); ?>
 
-		<?php do_settings_sections( 'paypal-for-digital-goods' ); ?>
+	<?php do_settings_sections( 'paypal-for-digital-goods' ); ?>
 
-		<?php submit_button(); ?>
+	<?php submit_button(); ?>
 
-	</form>
+    </form>
 </div>

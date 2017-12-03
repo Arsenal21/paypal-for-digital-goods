@@ -85,50 +85,49 @@ class OrdersPPDG {
      *
      * @return    Numeric    Post or Order ID.
      */
-    public function insert( $EC_details, $ConfirmPayment_details ) {
+    public function insert( $payment, $payer ) {
 	$post			 = array();
-	$post[ 'post_title' ]	 = $ConfirmPayment_details[ 'L_QTY0' ] . ' ' . $EC_details[ 'L_NAME0' ] . ' - ' . $EC_details[ 'ACK' ];
-	$post[ 'post_status' ]	 = 'pending';
+	$post[ 'post_title' ]	 = $payment[ 'quantity' ] . ' ' . $payment[ 'item_name' ] . ' - ' . $payment[ 'state' ];
+	$post[ 'post_status' ]	 = 'publish';
 
-	$ack	 = strtoupper( $ConfirmPayment_details[ "ACK" ] );
-	$output	 = '';
+//	$ack	 = strtoupper( $ConfirmPayment_details[ "ACK" ] );
+	$output = '';
 
-	// Add error info in case of failure
-	if ( $ack != "SUCCESS" && $ack != "SUCCESSWITHWARNING" ) {
-
-	    $ErrorCode		 = urldecode( $ConfirmPayment_details[ "L_ERRORCODE0" ] );
-	    $ErrorShortMsg		 = urldecode( $ConfirmPayment_details[ "L_SHORTMESSAGE0" ] );
-	    $ErrorLongMsg		 = urldecode( $ConfirmPayment_details[ "L_LONGMESSAGE0" ] );
-	    $ErrorSeverityCode	 = urldecode( $ConfirmPayment_details[ "L_SEVERITYCODE0" ] );
-
-	    $output	 .= "<h2>Payment Failure Details</h2>" . "\n";
-	    $output	 .= __( "Payment API call failed. " );
-	    $output	 .= __( "Detailed Error Message: " ) . $ErrorLongMsg;
-	    $output	 .= __( "Short Error Message: " ) . $ErrorShortMsg;
-	    $output	 .= __( "Error Code: " ) . $ErrorCode;
-	    $output	 .= __( "Error Severity Code: " ) . $ErrorSeverityCode;
-	    $output	 .= "\n\n";
-	}
+//	// Add error info in case of failure
+//	if ( $ack != "SUCCESS" && $ack != "SUCCESSWITHWARNING" ) {
+//
+//	    $ErrorCode		 = urldecode( $ConfirmPayment_details[ "L_ERRORCODE0" ] );
+//	    $ErrorShortMsg		 = urldecode( $ConfirmPayment_details[ "L_SHORTMESSAGE0" ] );
+//	    $ErrorLongMsg		 = urldecode( $ConfirmPayment_details[ "L_LONGMESSAGE0" ] );
+//	    $ErrorSeverityCode	 = urldecode( $ConfirmPayment_details[ "L_SEVERITYCODE0" ] );
+//
+//	    $output	 .= "<h2>Payment Failure Details</h2>" . "\n";
+//	    $output	 .= __( "Payment API call failed. " );
+//	    $output	 .= __( "Detailed Error Message: " ) . $ErrorLongMsg;
+//	    $output	 .= __( "Short Error Message: " ) . $ErrorShortMsg;
+//	    $output	 .= __( "Error Code: " ) . $ErrorCode;
+//	    $output	 .= __( "Error Severity Code: " ) . $ErrorSeverityCode;
+//	    $output	 .= "\n\n";
+//	}
 
 	$output	 .= __( "<h2>Order Details</h2>" ) . "\n";
-	$output	 .= __( "Order Time: " ) . date( "F j, Y, g:i a", strtotime( $EC_details[ 'TIMESTAMP' ] ) ) . "\n";
-	$output	 .= __( "Transaction ID: " ) . $ConfirmPayment_details[ 'PAYMENTINFO_0_TRANSACTIONID' ] . "\n";
+	$output	 .= __( "Order Time: " ) . date( "F j, Y, g:i a", strtotime( $payment[ 'create_time' ] ) ) . "\n";
+	$output	 .= __( "Transaction ID: " ) . $payment[ 'id' ] . "\n";
 	$output	 .= "--------------------------------" . "\n";
-	$output	 .= __( "Product Name: " ) . $EC_details[ 'L_PAYMENTREQUEST_0_NAME0' ] . "\n";
-	$output	 .= __( "Quantity:" ) . $EC_details[ 'L_PAYMENTREQUEST_0_QTY0' ] . "\n";
-	$output	 .= __( "Amount:" ) . $EC_details[ 'L_PAYMENTREQUEST_0_AMT0' ] . ' ' . $EC_details[ 'CURRENCYCODE' ] . "\n";
+	$output	 .= __( "Product Name: " ) . $payment[ 'item_name' ] . "\n";
+	$output	 .= __( "Quantity: " ) . $payment[ 'quantity' ] . "\n";
+	$output	 .= __( "Price: " ) . $payment[ 'price' ] . ' ' . $payment[ 'currency' ] . "\n";
 	$output	 .= "--------------------------------" . "\n";
-	$output	 .= __( "Total Amount:" ) . $EC_details[ 'AMT' ] . ' ' . $EC_details[ 'CURRENCYCODE' ] . "\n";
-
+	$output	 .= __( "Total Amount: " ) . $payment[ 'amount' ] . ' ' . $payment[ 'currency' ] . "\n";
 
 	$output .= "\n\n";
 
 	$output	 .= __( "<h2>Customer Details</h2>" ) . "\n";
-	$output	 .= __( "Name: " ) . $EC_details[ 'FIRSTNAME' ] . ' ' . $EC_details[ 'LASTNAME' ] . "\n";
-	$output	 .= __( "Payer ID: " ) . $EC_details[ 'PAYERID' ] . "\n";
-	$output	 .= __( "Payer Status: " ) . $EC_details[ 'PAYERSTATUS' ] . "\n";
-	$output	 .= __( "E-Mail Address: " ) . $EC_details[ 'EMAIL' ] . "\n";
-	$output	 .= __( "Country Code: " ) . $EC_details[ 'COUNTRYCODE' ] . "\n";
+	$output	 .= __( "Name: " ) . $payer[ 'payer_info' ][ 'first_name' ] . ' ' . $payer[ 'payer_info' ][ 'last_name' ] . "\n";
+	$output	 .= __( "Payer ID: " ) . $payer[ 'payer_info' ][ 'payer_id' ] . "\n";
+	$output	 .= __( "Payer Status: " ) . $payer[ 'status' ] . "\n";
+	$output	 .= __( "E-Mail Address: " ) . $payer[ 'payer_info' ][ 'email' ] . "\n";
+	$output	 .= __( "Country Code: " ) . $payer[ 'payer_info' ][ 'country_code' ] . "\n";
 
 	$post[ 'post_content' ]	 = $output; //..var_export($ConfirmPayment_details, true)'<br/><br/>'.var_export($EC_details, true);
 	$post[ 'post_type' ]	 = 'ppdgorder';

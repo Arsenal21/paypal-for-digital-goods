@@ -146,16 +146,19 @@ class PPDG_Admin {
 	add_settings_section( 'ppdg-documentation', 'Plugin Documentation', array( &$this, 'general_documentation_callback' ), $this->plugin_slug );
 
 	add_settings_section( 'ppdg-global-section', 'Global Settings', null, $this->plugin_slug );
+	add_settings_section( 'ppdg-button-style-section', 'Button Style', null, $this->plugin_slug );
 	add_settings_section( 'ppdg-credentials-section', 'PayPal Credentials', null, $this->plugin_slug );
 
-	add_settings_field( 'checkout_url', 'Checkout Page URL', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-global-section', array( 'field' => 'checkout_url', 'desc' => 'This page is automatically created for you when you install the plugin.' ) );
 	add_settings_field( 'currency_code', 'Currency Code', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-global-section', array( 'field' => 'currency_code', 'desc' => 'Example: USD, CAD etc', 'size' => 10 ) );
-	add_settings_field( 'button_text', 'Button Text', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-global-section', array( 'field' => 'button_text', 'desc' => 'Example: Buy Now, Pay Now etc.' ) );
 
 	add_settings_field( 'is_live', 'Live Mode', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'is_live', 'desc' => 'Check this to run the transaction in live mode. When unchecked it will run in sandbox mode.' ) );
-	add_settings_field( 'api_username', 'PayPal API Username', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'api_username', 'desc' => 'PayPal Classic API Username e.g. abc@example.com' ) );
-	add_settings_field( 'api_password', 'PayPal API Password', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'api_password', 'desc' => 'PayPal Classic API Password ' ) );
-	add_settings_field( 'api_signature', 'PayPal API Signature', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'api_signature', 'desc' => 'Something like "AURPxXZ.c0vdTiuUDcG0uYM.zeK1Ar3LXRUDSvFlWj1H-UZg2YrFckOG"' ) );
+	add_settings_field( 'live_client_id', 'Live Client ID', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'live_client_id', 'desc' => '' ) );
+	add_settings_field( 'sandbox_client_id', 'Sandbox Client ID', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'sandbox_client_id', 'desc' => '' ) );
+
+	add_settings_field( 'btn_type', 'Button Type', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_type', 'desc' => '', 'vals' => array( 'checkout', 'pay', 'paypal', 'buynow' ), 'texts' => array( 'Checkout', 'Pay', 'PayPal', 'Buy Now' ) ) );
+	add_settings_field( 'btn_shape', 'Button Type', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_shape', 'desc' => '', 'vals' => array( 'pill', 'rect' ), 'texts' => array( 'Pill', 'Rectangle' ) ) );
+	add_settings_field( 'btn_size', 'Button Size', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_size', 'desc' => '', 'vals' => array( 'small', 'medium', 'large', 'responsive' ), 'texts' => array( 'Small', 'Medium', 'Large', 'Responsive' ) ) );
+	add_settings_field( 'btn_color', 'Button Color', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_color', 'desc' => '<div id="wp-ppdg-preview-container"><p>Button preview:</p><br /><div id="paypal-button-container"></div><div id="wp-ppdg-preview-protect"></div></div>', 'vals' => array( 'gold', 'blue', 'silver', 'black' ), 'texts' => array( 'Gold', 'Blue', 'Silver', 'Black' ) ) );
     }
 
     public function general_documentation_callback( $args ) {
@@ -178,7 +181,7 @@ class PPDG_Admin {
 
 	extract( $args );
 
-	$field_value = esc_attr( $settings[ $field ] );
+	$field_value = esc_attr( isset( $settings[ $field ] ) ? $settings[ $field ] : '' );
 
 	if ( empty( $size ) )
 	    $size = 40;
@@ -187,12 +190,23 @@ class PPDG_Admin {
 	    case 'is_live':
 		echo "<input type='checkbox' name='ppdg-settings[{$field}]' value='1' " . ($field_value ? 'checked=checked' : '') . " /><div style='font-size:11px;'>{$desc}</div>";
 		break;
+	    case 'btn_size':
+	    case 'btn_color':
+	    case 'btn_type':
+	    case 'btn_shape':
+		echo '<select id="wp-ppdg-' . $field . '" class="wp-ppdg-button-style" name="ppdg-settings[' . $field . ']">';
+		$opts = '';
+		foreach ( $vals as $key => $value ) {
+		    $opts .= '<option value="' . $value . '"' . ($value === $field_value ? ' selected' : '') . '>' . $texts[ $key ] . '</option>';
+		}
+		echo $opts;
+		echo '</select>';
+		echo $desc;
+		break;
 	    default:
 		// case 'currency_code':
-		// case 'button_text':
-		// case 'api_username':
-		// case 'api_password':
-		// case 'api_signature':
+		// case 'live_client_id':
+		// case 'sandbox_client_id':
 		echo "<input type='text' name='ppdg-settings[{$field}]' value='{$field_value}' size='{$size}' /> <div style='font-size:11px;'>{$desc}</div>";
 		break;
 	}
@@ -211,34 +225,22 @@ class PPDG_Admin {
 	else
 	    $output[ 'is_live' ]	 = 1;
 
-	if ( empty( $input[ 'api_username' ] ) || empty( $input[ 'api_password' ] ) || empty( $input[ 'api_signature' ] ) ) {
-	    add_settings_error( 'ppdg-settings', 'invalid-credentials', 'You must fill all API credentials for plugin to work correctly.' );
-	}
+	$output[ 'btn_size' ]	 = $input[ 'btn_size' ];
+	$output[ 'btn_color' ]	 = $input[ 'btn_color' ];
+	$output[ 'btn_type' ]	 = $input[ 'btn_type' ];
+	$output[ 'btn_shape' ]	 = $input[ 'btn_shape' ];
 
-
-	if ( ! empty( $input[ 'checkout_url' ] ) )
-	    $output[ 'checkout_url' ] = $input[ 'checkout_url' ];
-	else
-	    add_settings_error( 'ppdg-settings', 'invalid-checkout_url', 'Please specify a checkout page.' );
-
-	if ( ! empty( $input[ 'button_text' ] ) )
-	    $output[ 'button_text' ] = $input[ 'button_text' ];
-	else
-	    add_settings_error( 'ppdg-settings', 'invalid-button-text', 'Button text should not be empty.' );
 
 	if ( ! empty( $input[ 'currency_code' ] ) )
 	    $output[ 'currency_code' ] = $input[ 'currency_code' ];
 	else
 	    add_settings_error( 'ppdg-settings', 'invalid-currency-code', 'You must specify payment curency.' );
 
-	if ( ! empty( $input[ 'api_username' ] ) )
-	    $output[ 'api_username' ] = $input[ 'api_username' ];
+	if ( ! empty( $input[ 'live_client_id' ] ) )
+	    $output[ 'live_client_id' ] = $input[ 'live_client_id' ];
 
-	if ( ! empty( $input[ 'api_password' ] ) )
-	    $output[ 'api_password' ] = $input[ 'api_password' ];
-
-	if ( ! empty( $input[ 'api_signature' ] ) )
-	    $output[ 'api_signature' ] = $input[ 'api_signature' ];
+	if ( ! empty( $input[ 'sandbox_client_id' ] ) )
+	    $output[ 'sandbox_client_id' ] = $input[ 'sandbox_client_id' ];
 
 	return $output;
     }

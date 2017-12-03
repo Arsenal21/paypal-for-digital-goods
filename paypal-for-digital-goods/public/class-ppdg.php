@@ -41,8 +41,8 @@ class PPDG {
      *
      * @var      object
      */
-    protected static $instance = null;
-    private $settings = null;
+    protected static $instance	 = null;
+    private $settings		 = null;
 
     /**
      * Initialize the plugin by setting localization and loading public scripts
@@ -60,9 +60,15 @@ class PPDG {
 	add_action( 'wpmu_new_blog', array( $this, 'activate_new_site' ) );
 
 	// Load public-facing style sheet and JavaScript.
-	// add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+	if ( ! is_admin() ) {
+	    add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+	}
 	// add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 	add_action( 'after_switch_theme', array( $this, 'rewrite_flush' ) );
+    }
+
+    public function enqueue_styles() {
+	wp_register_style( 'wp-ppdg-jquery-ui-style', plugin_dir_url( __FILE__ ) . 'assets/css/smoothness/jquery-ui.min.css' );
     }
 
     public function get_setting( $field ) {
@@ -216,36 +222,14 @@ class PPDG {
 	$default		 = array(
 	    'is_live'	 => 0,
 	    'currency_code'	 => 'USD',
-	    'button_text'	 => 'Buy Now',
-	    'api_username'	 => 'xyz.biz_api1.abc.com',
-	    'api_password'	 => '1234567891',
-	    'api_signature'	 => 'xxxxxxx.xxxxxxxxxxxxxxx.xxxxxxxxxxxxxx-xxxxxxx',
-	    'checkout_url'	 => site_url( 'checkout' )
+	    'btn_shape'	 => 'pill',
+	    'btn_color'	 => 'gold',
+	    'btn_type'	 => 'checkout',
+	    'btn_size'	 => 'small',
 	);
 	$alreadyInstalled	 = get_option( 'ppdg-settings' );
 	if ( empty( $alreadyInstalled ) ) {
 	    add_option( 'ppdg-settings', $default );
-	}
-	//create checkout page           
-	$args			 = array(
-	    'post_type' => 'page'
-	);
-	$pages			 = get_pages( $args );
-	$checkout_page_id	 = '';
-	foreach ( $pages as $page ) {
-	    if ( strpos( $page->post_content, 'ppdg_checkout' ) !== false ) {
-		$checkout_page_id = $page->ID;
-	    }
-	}
-	if ( $checkout_page_id == '' ) {
-	    $checkout_page_id	 = PPDG::create_post( 'page', 'Checkout', 'ppdg-checkout', '[ppdg_checkout]' );
-	    $checkout_page		 = get_post( $checkout_page_id );
-	    $checkout_page_url	 = $checkout_page->guid;
-	    $ppdg_settings		 = get_option( 'ppdg-settings' );
-	    if ( ! empty( $ppdg_settings ) ) {
-		$ppdg_settings[ 'checkout_url' ] = $checkout_page_url;
-		update_option( 'ppdg-settings', $ppdg_settings );
-	    }
 	}
     }
 

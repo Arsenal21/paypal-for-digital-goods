@@ -1,7 +1,7 @@
 === PayPal for Digital Goods ===
 Contributors: Tips and Tricks HQ
 Donate link: https://www.tipsandtricks-hq.com/paypal-for-digital-goods-wordpress-plugin
-Tags: paypal, payment, digital goods, payment gateway, instant payment, commerce, digital downloads, download, downloads, e-commerce, e-store, ecommerce, eshop, digital, goods, payment gateway
+Tags: paypal, payment, express checkout, digital goods, payment gateway, instant payment, digital downloads, e-commerce
 Requires at least: 3.5
 Tested up to: 4.9
 Stable tag: 1.6

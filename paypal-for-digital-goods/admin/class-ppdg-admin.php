@@ -137,8 +137,6 @@ class PPDG_Admin {
 
     /**
      * Register Admin page settings
-     *
-     * @since    1.0.0
      */
     public function register_settings( $value = '' ) {
 	register_setting( 'ppdg-settings-group', 'ppdg-settings', array( &$this, 'settings_sanitize_field_callback' ) );
@@ -173,8 +171,6 @@ class PPDG_Admin {
 
     /**
      * Settings HTML
-     *
-     * @since    1.0.0
      */
     public function settings_field_callback( $args ) {
 	$settings = (array) get_option( 'ppdg-settings' );

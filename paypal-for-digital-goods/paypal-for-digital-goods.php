@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       PayPal for Digital Goods
  * Description:       This plugin allows you to generate a customizable PayPal payment button that lets user pay instantly in a popup via PayPal.
- * Version:           1.5
+ * Version:           1.6
  * Author:            Tips and Tricks HQ
  * Author URI:        https://www.tipsandtricks-hq.com/
  * Plugin URI:        https://www.tipsandtricks-hq.com/paypal-for-digital-goods-wordpress-plugin
@@ -11,6 +11,9 @@
  * License:           GPL2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */
+
+//slug - wp_ppdg_
+
 if ( ! defined( 'ABSPATH' ) )
     exit; //Exit if accessed directly
 
@@ -128,9 +131,12 @@ function wp_ppdg_process_payment() {
 
     do_action( 'ppdg_payment_completed', $payment );
 
-    $res		 = array();
-    $res[ 'title' ]	 = 'Payment Completed';
-    $res[ 'msg' ]	 = 'Thanks for your purchase. Please <a href="' . base64_decode( $url ) . '">сlick here</a> to download the file.';
+    $res = array();
+    $res[ 'title' ] = 'Payment Completed';
+    
+    $thank_you_msg = '<div class="wp_ppdg_thank_you_message"><p>Thanks for your purchase.</p><p>Please <a href="' . base64_decode( $url ) . '">сlick here</a> to download the file.</p></div>';
+    $thank_you_msg = apply_filters('wp_ppdg_thank_you_message', $thank_you_msg);
+    $res[ 'msg' ] = $thank_you_msg;
 
     echo json_encode( $res );
 

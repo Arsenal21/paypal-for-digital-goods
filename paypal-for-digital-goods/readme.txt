@@ -4,23 +4,21 @@ Donate link: https://www.tipsandtricks-hq.com/paypal-for-digital-goods-wordpress
 Tags: paypal, payment, digital goods, payment gateway, instant payment, commerce, digital downloads, download, downloads, e-commerce, e-store, ecommerce, eshop, digital, goods, payment gateway
 Requires at least: 3.5
 Tested up to: 4.9
-Stable tag: 1.5
+Stable tag: 1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Allows you to use the PayPal for Digital Goods gateway to accept payment for a digital item.
+Allows you to use the PayPal Express Checkout API to accept payment for a digital item in a popup.
 
 == Description ==
 
-This plugin provides you a shortcode to generate a customizable PayPal payment button that allows a user to pay for an item instantly in a popup using the PayPal for digital goods API/Gateway. 
+This plugin provides you a shortcode to generate a customizable PayPal payment button that allows a user to pay for an item instantly in a popup using the PayPal's Express Checkout API/Gateway.
 
-The full checkout happens in a overlay/popup window and the customer never leaves your site.
+The full checkout takes place in an overlay/popup window and the customer never leaves your site.
 
 This is ideal for selling file downloads via PayPal.
 
 View configuration and usage details on the [paypal for digital goods plugin](https://www.tipsandtricks-hq.com/paypal-for-digital-goods-wordpress-plugin) page
-
-https://www.youtube.com/watch?v=HA1WNf9adY4
 
 = This plugin will be ideal for you if you are selling the following =
 
@@ -137,6 +135,11 @@ https://www.tipsandtricks-hq.com/paypal-for-digital-goods-wordpress-plugin
 None
 
 == Changelog ==
+
+= 1.6 =
+* Updated the plugin's code to use the new PayPal's express checkout API.
+* Added a new filter to allow customization of the Thank You message.
+
 = 1.4 and 1.5 =
 * Re-worked the price hashing code to remove any chance of any kind of price field manipulation.
 

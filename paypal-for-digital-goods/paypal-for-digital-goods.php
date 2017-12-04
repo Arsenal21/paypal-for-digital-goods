@@ -134,7 +134,7 @@ function wp_ppdg_process_payment() {
     $res = array();
     $res[ 'title' ] = 'Payment Completed';
     
-    $thank_you_msg = '<div class="wp_ppdg_thank_you_message"><p>Thanks for your purchase.</p><p>Please <a href="' . base64_decode( $url ) . '">сlick here</a> to download the file.</p></div>';
+    $thank_you_msg = '<div class="wp_ppdg_thank_you_message"><p>Thank you for your purchase.</p><br /><p>Please <a href="' . base64_decode( $url ) . '">сlick here</a> to download the file.</p></div>';
     $thank_you_msg = apply_filters('wp_ppdg_thank_you_message', $thank_you_msg);
     $res[ 'msg' ] = $thank_you_msg;
 

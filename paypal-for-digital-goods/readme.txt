@@ -68,9 +68,6 @@ It supports the following attributes in the shortcode -
     (URL) (optional) URL of the downloadable file.
     Possible Values: http://example.com/my-downloads/product.zip
 
-    button_text:
-    (string) (optional) Label of the payment button
-    Possible Values: 'Buy Now', 'Pay Now' etc
 
 Please visit Settings -> PayPal for Digital Goods admin area to configure default options. 
 
@@ -78,7 +75,7 @@ You can also test it on PayPal Sandbox before going Live.
 
 == Usage ==
 
-[paypal_for_digital_goods name="Cool Script" price="50" url="http://example.com/downloads/my-script.zip" button_text="Buy Now"]
+[paypal_for_digital_goods name="Cool Script" price="50" url="http://example.com/downloads/my-script.zip"]
 
 == Installation ==
 
@@ -118,9 +115,9 @@ Yes, you can.
 
 Yes, please use "quantity" attribute.
 
-= Can I change the button label? =
+= Can I change the button? =
 
-Yes, please use "button_text" attribute
+Yes, you can customize it in the settings menu of this plugin.
 
 = Can I test it on PayPal sandbox? =
 

@@ -20,6 +20,14 @@ This is ideal for selling file downloads via PayPal.
 
 View configuration and usage details on the [paypal for digital goods plugin](https://www.tipsandtricks-hq.com/paypal-for-digital-goods-wordpress-plugin) page
 
+= Checkout Process Demo =
+
+https://www.youtube.com/watch?v=BgzDx0kuNR8
+
+= Basic Setup and Usage Video =
+
+https://www.youtube.com/watch?v=nIv8D-qTY4g
+
 = This plugin will be ideal for you if you are selling the following =
 
 * eBooks (PDF, epub, mobi etc.)

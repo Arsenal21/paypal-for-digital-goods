@@ -3,7 +3,7 @@ Contributors: Tips and Tricks HQ
 Donate link: https://www.tipsandtricks-hq.com/paypal-for-digital-goods-wordpress-plugin
 Tags: paypal, payment, express checkout, digital goods, payment gateway, instant payment, digital downloads, e-commerce
 Requires at least: 3.5
-Tested up to: 5.0
+Tested up to: 5.1
 Stable tag: 1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html

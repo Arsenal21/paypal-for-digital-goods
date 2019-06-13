@@ -12,18 +12,19 @@
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */
 
-//slug - wp_ppdg_
 
-if ( ! defined( 'ABSPATH' ) )
+//NEW slug wp_ppec_
+//OLD slug - wp_ppdg_
+
+if ( ! defined( 'ABSPATH' ) ){
     exit; //Exit if accessed directly
+}
 
-if ( version_compare( PHP_VERSION, '5.4.0' ) >= 0 ) {
+//PHP session
+if ( ! is_admin() || wp_doing_ajax() ) {
+    //Only use session for front-end and ajax.
     if ( session_status() == PHP_SESSION_NONE ) {
-	session_start();
-    }
-} else {
-    if ( session_id() == '' ) {
-	session_start();
+        session_start();
     }
 }
 

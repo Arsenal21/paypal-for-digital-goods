@@ -40,13 +40,11 @@ class PPDG_Admin {
 	// Add the options page and menu item.
 	add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
 
+	add_action( 'admin_notices', array( $this, 'show_admin_notices' ), 1 );
+
 	// Add an action link pointing to the options page.
 	$plugin_basename = plugin_basename( plugin_dir_path( realpath( dirname( __FILE__ ) ) ) . $this->plugin_slug . '.php' );
 	add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );
-
-	// register custom post type
-	$OrdersPPDG = OrdersPPDG::get_instance();
-	add_action( 'init', array( $OrdersPPDG, 'register_post_type' ), 0 );
     }
 
     /**
@@ -64,6 +62,29 @@ class PPDG_Admin {
 	}
 
 	return self::$instance;
+    }
+
+    public function add_admin_notice( $text, $type = "notice", $dism = true ) {
+	$msg_arr	 = get_transient( 'ppec_admin_msg_arr' );
+	$msg_arr	 = empty( $msg_arr ) ? array() : $msg_arr;
+	$msg_arr[]	 = array(
+	    'type'	 => $type,
+	    'text'	 => $text,
+	    'dism'	 => $dism,
+	);
+	set_transient( 'ppec_admin_msg_arr', $msg_arr );
+    }
+
+    public function show_admin_notices() {
+	$msg_arr = get_transient( 'ppec_admin_msg_arr' );
+
+	if ( ! empty( $msg_arr ) ) {
+	    delete_transient( 'ppec_admin_msg_arr' );
+	    $tpl = '<div class="notice notice-%1$s%3$s"><p>%2$s</p></div>';
+	    foreach ( $msg_arr as $msg ) {
+		echo sprintf( $tpl, $msg[ 'type' ], $msg[ 'text' ], $msg[ 'dism' ] === true ? ' is-dismissible' : ''  );
+	    }
+	}
     }
 
     /**
@@ -129,8 +150,8 @@ class PPDG_Admin {
 	 * - Change 'manage_options' to the capability you see fit
 	 *   For reference: http://codex.wordpress.org/Roles_and_Capabilities
 	 */
-	$this->plugin_screen_hook_suffix = add_options_page(
-	__( 'PayPal for Digital Goods', $this->plugin_slug ), __( 'PayPal for Digital Goods', $this->plugin_slug ), 'manage_options', $this->plugin_slug, array( $this, 'display_plugin_admin_page' )
+	$this->plugin_screen_hook_suffix = add_submenu_page(
+	'edit.php?post_type=' . PPECProducts::$products_slug, __( 'Settings', 'stripe-payments' ), __( 'Settings', 'stripe-payments' ), 'manage_options', 'stripe-payments-settings', array( $this, 'display_plugin_admin_page' )
 	);
 	add_action( 'admin_init', array( &$this, 'register_settings' ) );
     }

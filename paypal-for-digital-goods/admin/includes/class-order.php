@@ -17,31 +17,30 @@ class OrdersPPDG {
     }
 
     public function register_post_type() {
-	$text_domain	 = $this->ppdg->get_plugin_slug();
-	$labels		 = array(
-	    'name'			 => _x( 'Orders', 'Post Type General Name', $text_domain ),
-	    'singular_name'		 => _x( 'Order', 'Post Type Singular Name', $text_domain ),
-	    'menu_name'		 => __( 'Digital Goods Orders', $text_domain ),
-	    'parent_item_colon'	 => __( 'Parent Order:', $text_domain ),
-	    'all_items'		 => __( 'All Orders', $text_domain ),
-	    'view_item'		 => __( 'View Order', $text_domain ),
-	    'add_new_item'		 => __( 'Add New Order', $text_domain ),
-	    'add_new'		 => __( 'Add New', $text_domain ),
-	    'edit_item'		 => __( 'Edit Order', $text_domain ),
-	    'update_item'		 => __( 'Update Order', $text_domain ),
-	    'search_items'		 => __( 'Search Order', $text_domain ),
-	    'not_found'		 => __( 'Not found', $text_domain ),
-	    'not_found_in_trash'	 => __( 'Not found in Trash', $text_domain ),
+	$labels	 = array(
+	    'name'			 => _x( 'Orders', 'Post Type General Name', 'paypal-express-checkout' ),
+	    'singular_name'		 => _x( 'Order', 'Post Type Singular Name', 'paypal-express-checkout' ),
+	    'menu_name'		 => __( 'Digital Goods Orders', 'paypal-express-checkout' ),
+	    'parent_item_colon'	 => __( 'Parent Order:', 'paypal-express-checkout' ),
+	    'all_items'		 => __( 'Orders', 'paypal-express-checkout' ),
+	    'view_item'		 => __( 'View Order', 'paypal-express-checkout' ),
+	    'add_new_item'		 => __( 'Add New Order', 'paypal-express-checkout' ),
+	    'add_new'		 => __( 'Add New', 'paypal-express-checkout' ),
+	    'edit_item'		 => __( 'Edit Order', 'paypal-express-checkout' ),
+	    'update_item'		 => __( 'Update Order', 'paypal-express-checkout' ),
+	    'search_items'		 => __( 'Search Order', 'paypal-express-checkout' ),
+	    'not_found'		 => __( 'Not found', 'paypal-express-checkout' ),
+	    'not_found_in_trash'	 => __( 'Not found in Trash', 'paypal-express-checkout' ),
 	);
-	$args		 = array(
-	    'label'			 => __( 'orders', $text_domain ),
-	    'description'		 => __( 'PPDG Orders', $text_domain ),
+	$args	 = array(
+	    'label'			 => __( 'orders', 'paypal-express-checkout' ),
+	    'description'		 => __( 'PPDG Orders', 'paypal-express-checkout' ),
 	    'labels'		 => $labels,
 	    'supports'		 => array( 'title', 'editor', 'excerpt', 'revisions', 'custom-fields', ),
 	    'hierarchical'		 => false,
 	    'public'		 => false,
 	    'show_ui'		 => true,
-	    'show_in_menu'		 => true,
+	    'show_in_menu'		 => 'edit.php?post_type=' . PPECProducts::$products_slug,
 	    'show_in_nav_menus'	 => true,
 	    'show_in_admin_bar'	 => true,
 	    'menu_position'		 => 80,

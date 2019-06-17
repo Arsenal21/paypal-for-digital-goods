@@ -18,8 +18,11 @@ class PPDGShortcode {
     function __construct() {
 	$this->ppdg = PPDG::get_instance();
 
-	add_shortcode( 'paypal_for_digital_goods', array( &$this, 'shortcode_paypal_for_digital_goods' ) );
-	add_shortcode( 'ppdg_checkout', array( &$this, 'shortcode_ppdg_checkout' ) );
+	add_shortcode( 'paypal_for_digital_goods', array( $this, 'shortcode_paypal_for_digital_goods' ) );
+	add_shortcode( 'ppdg_checkout', array( $this, 'shortcode_ppdg_checkout' ) );
+
+	add_shortcode( 'paypal_express_checkout', array( $this, 'shortcode_paypal_express_checkout' ) );
+
 	if ( ! is_admin() ) {
 	    add_filter( 'widget_text', 'do_shortcode' );
 	}
@@ -42,6 +45,33 @@ class PPDGShortcode {
 	return self::$instance;
     }
 
+    private function show_err_msg( $msg ) {
+	return sprintf( '<div class="ppec-error-msg" style="color: red;">%s</div>', $msg );
+    }
+
+    function shortcode_paypal_express_checkout( $atts ) {
+	if ( empty( $atts[ 'product_id' ] ) ) {
+	    $error_msg	 = __( "Error: product ID is invalid.", 'paypal-express-checkout' );
+	    $err		 = $this->show_err_msg( $error_msg );
+	    return $err;
+	}
+	$post_id = intval( $atts[ 'product_id' ] );
+	$post	 = get_post( $post_id );
+	if ( ! $post || get_post_type( $post_id ) !== PPECProducts::$products_slug ) {
+	    $error_msg	 = sprintf( __( "Can't find product with ID %s", 'paypal-express-checkout' ), $post_id );
+	    $err		 = $this->show_err_msg( $error_msg );
+	    return $err;
+	}
+
+	$title	 = get_the_title( $post_id );
+	$price	 = get_post_meta( $post_id, 'ppec_product_price', true );
+	$url	 = get_post_meta( $post_id, 'ppec_product_upload', true );
+	$content = get_the_content( null, false, $post_id );
+	$sc	 = sprintf( '[paypal_for_digital_goods name="%s" price="%s" url="%s"]%s[/paypal_for_digital_goods]', $title, $price, $url, $content );
+	$output	 = do_shortcode( $sc );
+	echo $output;
+    }
+
     function shortcode_paypal_for_digital_goods( $atts, $content = "" ) {
 
 	extract( shortcode_atts( array(
@@ -56,7 +86,9 @@ class PPDGShortcode {
 	    'btn_color'	 => $this->ppdg->get_setting( 'btn_color' ) !== false ? $this->ppdg->get_setting( 'btn_color' ) : 'gold',
 	), $atts ) );
 	if ( empty( $url ) ) {
-	    return '<div style="color:red;">Please specify a digital url for your product </div>';
+	    $err_msg = __( "Please specify a digital url for your product", 'paypal-express-checkout' );
+	    $err	 = $this->show_err_msg( $err_msg );
+	    return $err;
 	}
 	$url			 = base64_encode( $url );
 	$button_id		 = 'paypal_button_' . count( self::$payment_buttons );
@@ -80,7 +112,9 @@ class PPDGShortcode {
 	}
 
 	if ( empty( $client_id ) ) {
-	    return '<div style="color:red;">Please enter ' . $env . ' Client ID in the settings.</div>';
+	    $err_msg = sprintf( __( "Please enter %s Client ID in the settings.", 'paypal-express-checkout' ), $env );
+	    $err	 = $this->show_err_msg( $err_msg );
+	    return $err;
 	}
 
 	$output = '';
@@ -105,7 +139,7 @@ class PPDGShortcode {
 	    			dlgTitle = res.title;
 	    			dlgMsg = res.msg;
 	    		    } catch (e) {
-	    			dlgTitle = "Error Occured";
+	    			dlgTitle = "Error Occurred";
 	    			dlgMsg = data;
 	    			ret = false;
 	    		    }
@@ -131,6 +165,20 @@ class PPDGShortcode {
 	wp_enqueue_style( 'wp-ppdg-jquery-ui-style' );
 
 	ob_start();
+
+	//output content if needed
+
+	global $wp_embed;
+	if ( isset( $wp_embed ) && is_object( $wp_embed ) ) {
+	    if ( method_exists( $wp_embed, 'autoembed' ) ) {
+		$content = $wp_embed->autoembed( $content );
+	    }
+	    if ( method_exists( $wp_embed, 'run_shortcode' ) ) {
+		$content = $wp_embed->run_shortcode( $content );
+	    }
+	}
+	$content = wpautop( do_shortcode( $content ) );
+	echo $content;
 	?>
 	<div id="<?php echo $button_id; ?>"></div>
 
@@ -188,7 +236,7 @@ class PPDGShortcode {
 	    }, '#<?php echo $button_id; ?>');
 	</script>
 	<?php
-	$output .= ob_get_clean();
+	$output	 .= ob_get_clean();
 	return $output;
     }
 

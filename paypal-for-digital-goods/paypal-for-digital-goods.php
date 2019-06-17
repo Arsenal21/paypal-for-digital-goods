@@ -18,13 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; //Exit if accessed directly
 }
 
-//PHP session
-if ( ! is_admin() || wp_doing_ajax() ) {
-    //Only use session for front-end and ajax.
-    if ( session_status() == PHP_SESSION_NONE ) {
-	session_start();
-    }
-}
+//Define constants
+define( 'WP_PPEC_PLUGIN_URL', plugins_url( '', __FILE__ ) );
+define( 'WP_PPEC_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
+define( 'WP_PPEC_PLUGIN_FILE', __FILE__ );
 
 /* ----------------------------------------------------------------------------*
  * Public-Facing Functionality
@@ -32,6 +29,7 @@ if ( ! is_admin() || wp_doing_ajax() ) {
 
 require_once( plugin_dir_path( __FILE__ ) . 'public/class-ppdg.php' );
 require_once( plugin_dir_path( __FILE__ ) . 'public/includes/class-shortcode-ppdg.php' );
+require_once( plugin_dir_path( __FILE__ ) . 'admin/includes/class-products.php' );
 require_once( plugin_dir_path( __FILE__ ) . 'admin/includes/class-order.php' );
 
 
@@ -44,30 +42,24 @@ register_deactivation_hook( __FILE__, array( 'PPDG', 'deactivate' ) );
 
 /*
  */
+
+
+if ( is_admin() ) {
+    require_once( plugin_dir_path( __FILE__ ) . 'admin/class-ppdg-admin.php' );
+    add_action( 'plugins_loaded', array( 'PPDG_Admin', 'get_instance' ) );
+}
+
+//Register post types
+$PPECProducts = PPECProducts::get_instance();
+add_action( 'init', array( $PPECProducts, 'register_post_type' ), 0 );
+
+$OrdersPPDG = OrdersPPDG::get_instance();
+add_action( 'init', array( $OrdersPPDG, 'register_post_type' ), 0 );
+
 add_action( 'plugins_loaded', array( 'PPDG', 'get_instance' ) );
 add_action( 'plugins_loaded', array( 'PPDGShortcode', 'get_instance' ) );
 add_action( 'wp_ajax_wp_ppdg_process_payment', 'wp_ppdg_process_payment' );
 add_action( 'wp_ajax_nopriv_wp_ppdg_process_payment', 'wp_ppdg_process_payment' );
-
-/* ----------------------------------------------------------------------------*
- * Dashboard and Administrative Functionality
- * ---------------------------------------------------------------------------- */
-
-/*
- * If you want to include Ajax within the dashboard, change the following
- * conditional to:
- *
- * if ( is_admin() ) {
- *   ...
- * }
- *
- * The code below is intended to to give the lightest footprint possible.
- */
-if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
-
-    require_once( plugin_dir_path( __FILE__ ) . 'admin/class-ppdg-admin.php' );
-    add_action( 'plugins_loaded', array( 'PPDG_Admin', 'get_instance' ) );
-}
 
 function wp_ppdg_process_payment() {
     if ( ! isset( $_POST[ 'wp_ppdg_payment' ] ) ) {

@@ -267,7 +267,7 @@ class PPDG {
      */
     public function load_plugin_textdomain() {
 
-	$domain	 = $this->plugin_slug;
+	$domain	 = 'paypal-express-checkout';
 	$locale	 = apply_filters( 'plugin_locale', get_locale(), $domain );
 
 	load_textdomain( $domain, trailingslashit( WP_LANG_DIR ) . $domain . '/' . $domain . '-' . $locale . '.mo' );

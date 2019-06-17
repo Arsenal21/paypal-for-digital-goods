@@ -11,12 +11,10 @@
  * License:           GPL2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */
-
-
 //NEW slug wp_ppec_
 //OLD slug - wp_ppdg_
 
-if ( ! defined( 'ABSPATH' ) ){
+if ( ! defined( 'ABSPATH' ) ) {
     exit; //Exit if accessed directly
 }
 
@@ -24,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ){
 if ( ! is_admin() || wp_doing_ajax() ) {
     //Only use session for front-end and ajax.
     if ( session_status() == PHP_SESSION_NONE ) {
-        session_start();
+	session_start();
     }
 }
 
@@ -132,12 +130,12 @@ function wp_ppdg_process_payment() {
 
     do_action( 'ppdg_payment_completed', $payment );
 
-    $res = array();
-    $res[ 'title' ] = 'Payment Completed';
-    
-    $thank_you_msg = '<div class="wp_ppdg_thank_you_message"><p>Thank you for your purchase.</p><br /><p>Please <a href="' . base64_decode( $url ) . '">сlick here</a> to download the file.</p></div>';
-    $thank_you_msg = apply_filters('wp_ppdg_thank_you_message', $thank_you_msg);
-    $res[ 'msg' ] = $thank_you_msg;
+    $res		 = array();
+    $res[ 'title' ]	 = 'Payment Completed';
+
+    $thank_you_msg	 = '<div class="wp_ppdg_thank_you_message"><p>Thank you for your purchase.</p><br /><p>Please <a href="' . base64_decode( $url ) . '">сlick here</a> to download the file.</p></div>';
+    $thank_you_msg	 = apply_filters( 'wp_ppdg_thank_you_message', $thank_you_msg );
+    $res[ 'msg' ]	 = $thank_you_msg;
 
     echo json_encode( $res );
 

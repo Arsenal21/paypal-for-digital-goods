@@ -64,15 +64,15 @@ add_action( 'wp_ajax_nopriv_wp_ppdg_process_payment', 'wp_ppdg_process_payment' 
 function wp_ppdg_process_payment() {
     if ( ! isset( $_POST[ 'wp_ppdg_payment' ] ) ) {
 	//no payment data provided
-	echo 'No payment data!';
-	wp_die();
+	_e( 'No payment data received.', 'paypal-express-checkout' );
+	exit;
     }
     $payment = $_POST[ 'wp_ppdg_payment' ];
 
     if ( $payment[ 'state' ] !== 'approved' ) {
 	//payment is unsuccessful
-	echo 'Payment failed! State: ' . $payment[ 'state' ];
-	wp_die();
+	printf( __( 'Payment is not approved. State: %s', 'paypal-express-checkout' ), $payment[ 'state' ] );
+	exit;
     }
 
     // get item name
@@ -82,8 +82,8 @@ function wp_ppdg_process_payment() {
     $price		 = get_transient( $trans_name . '-price' );
     if ( $price === false ) {
 	//no price set
-	echo 'No price set in transient!';
-	wp_die();
+	_e( 'No price set in transient.', 'paypal-express-checkout' );
+	exit;
     }
     $quantity	 = get_transient( $trans_name . '-quantity' );
     $currency	 = get_transient( $trans_name . '-currency' );
@@ -94,15 +94,15 @@ function wp_ppdg_process_payment() {
     //check if amount paid matches price x quantity
     if ( $amount != $price * $quantity ) {
 	//payment amount mismatch
-	echo 'Payment amount mismatch!';
-	wp_die();
+	_e( 'Payment amount mismatch original price.', 'paypal-express-checkout' );
+	exit;
     }
 
     //check if payment currency matches
     if ( $payment[ 'transactions' ][ 0 ][ 'amount' ][ 'currency' ] !== $currency ) {
 	//payment currency mismatch
-	echo 'Payment currency mismatch!';
-	wp_die();
+	_e( 'Payment currency mismatch.', 'paypal-express-checkout' );
+	exit;
     }
 
     //if code execution got this far, it means everything is ok with payment
@@ -123,9 +123,11 @@ function wp_ppdg_process_payment() {
     do_action( 'ppdg_payment_completed', $payment );
 
     $res		 = array();
-    $res[ 'title' ]	 = 'Payment Completed';
+    $res[ 'title' ]	 = __( 'Payment Completed', 'paypal-express-checkout' );
 
-    $thank_you_msg	 = '<div class="wp_ppdg_thank_you_message"><p>Thank you for your purchase.</p><br /><p>Please <a href="' . base64_decode( $url ) . '">сlick here</a> to download the file.</p></div>';
+    $thank_you_msg	 = '<div class="wp_ppdg_thank_you_message"><p>' . __( 'Thank you for your purchase.', 'paypal-express-checkout' ) . '</p>';
+    $click_here_str	 = sprintf( __( 'Please <a href="%s">click here</a> to download the file.', 'paypal-express-checkout' ), base64_decode( $url ) );
+    $thank_you_msg	 .= '<br /><p>' . $click_here_str . '</p></div>';
     $thank_you_msg	 = apply_filters( 'wp_ppdg_thank_you_message', $thank_you_msg );
     $res[ 'msg' ]	 = $thank_you_msg;
 

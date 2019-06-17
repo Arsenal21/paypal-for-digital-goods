@@ -131,8 +131,13 @@ class OrdersPPDG {
 	$post[ 'post_content' ]	 = $output; //..var_export($ConfirmPayment_details, true)'<br/><br/>'.var_export($EC_details, true);
 	$post[ 'post_type' ]	 = 'ppdgorder';
 
-	# code...
-	return wp_insert_post( $post );
+	$post_id = wp_insert_post( $post );
+
+	//save payment details in post meta for future use
+	update_post_meta( $post_id, 'ppec_payment_details', $payment );
+	update_post_meta( $post_id, 'ppec_payer_details', $payer );
+
+	return $post_id;
     }
 
 }

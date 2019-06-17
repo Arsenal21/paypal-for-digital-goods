@@ -14,7 +14,7 @@ class PPECProductsMetaboxes {
 
     function add_meta_boxes() {
 	add_meta_box( 'wsp_content', __( 'Description', 'paypal-express-checkout' ), array( $this, 'display_description_meta_box' ), PPECProducts::$products_slug, 'normal', 'default' );
-	add_meta_box( 'ppec_price_meta_box', esc_html( __( 'Price & Currency', 'paypal-express-checkout' ) ), array( $this, 'display_price_meta_box' ), PPECProducts::$products_slug, 'normal', 'default' );
+	add_meta_box( 'ppec_price_meta_box', esc_html( __( 'Price', 'paypal-express-checkout' ) ), array( $this, 'display_price_meta_box' ), PPECProducts::$products_slug, 'normal', 'default' );
 	add_meta_box( 'ppec_upload_meta_box', __( 'Download URL', 'paypal-express-checkout' ), array( $this, 'display_upload_meta_box' ), PPECProducts::$products_slug, 'normal', 'default' );
 	add_meta_box( 'ppec_shortcode_meta_box', __( 'Shortcode', 'paypal-express-checkout' ), array( $this, 'display_shortcode_meta_box' ), PPECProducts::$products_slug, 'side', 'default' );
     }
@@ -38,7 +38,7 @@ class PPECProductsMetaboxes {
     public function display_upload_meta_box( $post ) {
 	$current_val = get_post_meta( $post->ID, 'ppec_product_upload', true );
 	?>
-	<p><?php echo __( 'URL of your product (if you\'re selling digital products).', 'paypal-express-checkout' ); ?></p>
+	<p><?php echo __( 'URL of your product.', 'paypal-express-checkout' ); ?></p>
 
 	<div>
 	    <input id="ppec_product_upload" type="text" style="width: 100%" name="ppec_product_upload" value="<?php echo esc_attr( $current_val ); ?>" placeholder="https://..." />
@@ -114,7 +114,13 @@ class PPECProductsMetaboxes {
 
 	//download url
 	$product_url = filter_input( INPUT_POST, 'ppec_product_upload', FILTER_SANITIZE_URL );
-	update_post_meta( $post_id, 'ppec_product_upload', esc_url( $product_url, array( 'http', 'https', 'dropbox' ) ) );
+	if ( empty( $url ) ) {
+	    //url is empty
+	    $text = __( 'Please specify product download URL.', 'paypal-express-checkout' );
+	    $this->PPECAdmin->add_admin_notice( $text, 'error' );
+	} else {
+	    update_post_meta( $post_id, 'ppec_product_upload', esc_url( $product_url, array( 'http', 'https', 'dropbox' ) ) );
+	}
 
 	//price
 	$price	 = filter_input( INPUT_POST, 'ppec_product_price', FILTER_SANITIZE_STRING );

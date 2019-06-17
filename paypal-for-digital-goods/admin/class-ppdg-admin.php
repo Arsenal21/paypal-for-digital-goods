@@ -151,40 +151,39 @@ class PPDG_Admin {
 	 *   For reference: http://codex.wordpress.org/Roles_and_Capabilities
 	 */
 	$this->plugin_screen_hook_suffix = add_submenu_page(
-	'edit.php?post_type=' . PPECProducts::$products_slug, __( 'Settings', 'stripe-payments' ), __( 'Settings', 'stripe-payments' ), 'manage_options', 'stripe-payments-settings', array( $this, 'display_plugin_admin_page' )
+	'edit.php?post_type=' . PPECProducts::$products_slug, __( 'PayPal Express Checkout Settings', 'paypal-express-checkout' ), __( 'Settings', 'paypal-express-checkout' ), 'manage_options', 'ppec-settings-page', array( $this, 'display_plugin_admin_page' )
 	);
-	add_action( 'admin_init', array( &$this, 'register_settings' ) );
+	add_action( 'admin_init', array( $this, 'register_settings' ) );
     }
 
     /**
      * Register Admin page settings
      */
     public function register_settings( $value = '' ) {
-	register_setting( 'ppdg-settings-group', 'ppdg-settings', array( &$this, 'settings_sanitize_field_callback' ) );
+	register_setting( 'ppdg-settings-group', 'ppdg-settings', array( $this, 'settings_sanitize_field_callback' ) );
 
-	add_settings_section( 'ppdg-documentation', 'Plugin Documentation', array( &$this, 'general_documentation_callback' ), $this->plugin_slug );
+	add_settings_section( 'ppdg-documentation', __( 'Plugin Documentation', 'paypal-express-checkout' ), array( $this, 'general_documentation_callback' ), $this->plugin_slug );
 
-	add_settings_section( 'ppdg-global-section', 'Global Settings', null, $this->plugin_slug );
-	add_settings_section( 'ppdg-button-style-section', 'Button Style', null, $this->plugin_slug );
-	add_settings_section( 'ppdg-credentials-section', 'PayPal Credentials', null, $this->plugin_slug );
+	add_settings_section( 'ppdg-global-section', __( 'Global Settings', 'paypal-express-checkout' ), null, $this->plugin_slug );
+	add_settings_section( 'ppdg-button-style-section', __( 'Button Style', 'paypal-express-checkout' ), null, $this->plugin_slug );
+	add_settings_section( 'ppdg-credentials-section', __( 'PayPal Credentials', 'paypal-express-checkout' ), null, $this->plugin_slug );
 
-	add_settings_field( 'currency_code', 'Currency Code', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-global-section', array( 'field' => 'currency_code', 'desc' => 'Example: USD, CAD etc', 'size' => 10 ) );
+	add_settings_field( 'currency_code', __( 'Currency Code', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-global-section', array( 'field' => 'currency_code', 'desc' => __( 'Example: USD, CAD etc', 'paypal-express-checkout' ), 'size' => 10 ) );
 
-	add_settings_field( 'is_live', 'Live Mode', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'is_live', 'desc' => 'Check this to run the transaction in live mode. When unchecked it will run in sandbox mode.' ) );
-	add_settings_field( 'live_client_id', 'Live Client ID', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'live_client_id', 'desc' => '' ) );
-	add_settings_field( 'sandbox_client_id', 'Sandbox Client ID', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'sandbox_client_id', 'desc' => '' ) );
+	add_settings_field( 'is_live', __( 'Live Mode', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'is_live', 'desc' => __( 'Check this to run the transaction in live mode. When unchecked it will run in sandbox mode.', 'paypal-express-checkout' ) ) );
+	add_settings_field( 'live_client_id', __( 'Live Client ID', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'live_client_id', 'desc' => '' ) );
+	add_settings_field( 'sandbox_client_id', __( 'Sandbox Client ID', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'sandbox_client_id', 'desc' => '' ) );
 
-	add_settings_field( 'btn_type', 'Button Type', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_type', 'desc' => '', 'vals' => array( 'checkout', 'pay', 'paypal', 'buynow' ), 'texts' => array( 'Checkout', 'Pay', 'PayPal', 'Buy Now' ) ) );
-	add_settings_field( 'btn_shape', 'Button Type', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_shape', 'desc' => '', 'vals' => array( 'pill', 'rect' ), 'texts' => array( 'Pill', 'Rectangle' ) ) );
-	add_settings_field( 'btn_size', 'Button Size', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_size', 'desc' => '', 'vals' => array( 'small', 'medium', 'large', 'responsive' ), 'texts' => array( 'Small', 'Medium', 'Large', 'Responsive' ) ) );
-	add_settings_field( 'btn_color', 'Button Color', array( &$this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_color', 'desc' => '<div id="wp-ppdg-preview-container"><p>Button preview:</p><br /><div id="paypal-button-container"></div><div id="wp-ppdg-preview-protect"></div></div>', 'vals' => array( 'gold', 'blue', 'silver', 'black' ), 'texts' => array( 'Gold', 'Blue', 'Silver', 'Black' ) ) );
+	add_settings_field( 'btn_type', __( 'Button Type', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_type', 'desc' => '', 'vals' => array( 'checkout', 'pay', 'paypal', 'buynow' ), 'texts' => array( __( 'Checkout', 'paypal-express-checkout' ), __( 'Pay', 'paypal-express-checkout' ), __( 'PayPal', 'paypal-express-checkout' ), __( 'Buy Now', 'paypal-express-checkout' ) ) ) );
+	add_settings_field( 'btn_shape', __( 'Button Shape', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_shape', 'desc' => '', 'vals' => array( 'pill', 'rect' ), 'texts' => array( __( 'Pill', 'paypal-express-checkout' ), __( 'Rectangle', 'paypal-express-checkout' ) ) ) );
+	add_settings_field( 'btn_size', __( 'Button Size', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_size', 'desc' => '', 'vals' => array( 'small', 'medium', 'large', 'responsive' ), 'texts' => array( __( 'Small', 'paypal-express-checkout' ), __( 'Medium', 'paypal-express-checkout' ), __( 'Large', 'paypal-express-checkout' ), __( 'Responsive', 'paypal-express-checkout' ) ) ) );
+	add_settings_field( 'btn_color', __( 'Button Color', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_color', 'desc' => '<div id="wp-ppdg-preview-container"><p>' . __( 'Button preview:', 'paypal-express-checkout' ) . '</p><br /><div id="paypal-button-container"></div><div id="wp-ppdg-preview-protect"></div></div>', 'vals' => array( 'gold', 'blue', 'silver', 'black' ), 'texts' => array( __( 'Gold', 'paypal-express-checkout' ), __( 'Blue', 'paypal-express-checkout' ), __( 'Silver', 'paypal-express-checkout' ), __( 'Black', 'paypal-express-checkout' ) ) ) );
     }
 
     public function general_documentation_callback( $args ) {
 	?>
 	<div style="background: none repeat scroll 0 0 #FFF6D5;border: 1px solid #D1B655;color: #3F2502;margin: 10px 0;padding: 5px 5px 5px 10px;text-shadow: 1px 1px #FFFFFF;">
-	    <p>Please read the
-		<a target="_blank" href="https://www.tipsandtricks-hq.com/paypal-for-digital-goods-wordpress-plugin">PayPal for Digital Goods</a> plugin setup instructions to configure and use it.
+	    <p><?php _e( 'Please read the <a target="_blank" href="https://www.tipsandtricks-hq.com/paypal-for-digital-goods-wordpress-plugin">PayPal for Digital Goods</a> plugin setup instructions to configure and use it.', 'paypal-express-checkout' ); ?>
 	    </p>
 	</div>
 	<?php
@@ -251,7 +250,7 @@ class PPDG_Admin {
 	if ( ! empty( $input[ 'currency_code' ] ) )
 	    $output[ 'currency_code' ] = $input[ 'currency_code' ];
 	else
-	    add_settings_error( 'ppdg-settings', 'invalid-currency-code', 'You must specify payment curency.' );
+	    add_settings_error( 'ppdg-settings', 'invalid-currency-code', __( 'You must specify payment curency.', 'paypal-express-checkout' ) );
 
 	if ( ! empty( $input[ 'live_client_id' ] ) )
 	    $output[ 'live_client_id' ] = $input[ 'live_client_id' ];
@@ -280,7 +279,7 @@ class PPDG_Admin {
 
 	return array_merge(
 	array(
-	    'settings' => '<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_slug ) . '">' . __( 'Settings', $this->plugin_slug ) . '</a>'
+	    'settings' => '<a href="' . admin_url( 'edit.php?post_type=' . PPECProducts::$products_slug . '&page=ppec-settings-page' ) . '">' . __( 'Settings', 'paypal-express-checkout' ) . '</a>'
 	), $links
 	);
     }

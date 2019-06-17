@@ -129,8 +129,8 @@ class PPDGShortcode {
 	    <script src="https://www.paypalobjects.com/api/checkout.js"></script>
 	    <script>
 	        function wp_ppdg_process_payment(payment) {
-	    	console.log("payment details:");
-	    	console.log(payment);
+	    	//	    	console.log("payment details:");
+	    	//	    	console.log(payment);
 	    	jQuery.post("<?php echo get_admin_url(); ?>admin-ajax.php", {action: "wp_ppdg_process_payment", wp_ppdg_payment: payment})
 	    		.done(function (data) {
 	    		    var ret = true;
@@ -139,7 +139,7 @@ class PPDGShortcode {
 	    			dlgTitle = res.title;
 	    			dlgMsg = res.msg;
 	    		    } catch (e) {
-	    			dlgTitle = "Error Occurred";
+	    			dlgTitle = "<?php _e( 'Error occurred', 'paypal-express-checkout' ); ?>";
 	    			dlgMsg = data;
 	    			ret = false;
 	    		    }
@@ -208,7 +208,7 @@ class PPDGShortcode {
 			    transactions: [
 				{
 				    amount: {total: '<?php echo $price * $quantity; ?>', currency: '<?php echo $currency; ?>'},
-				    description: 'Payment for <?php echo esc_js( $name ); ?>',
+				    description: '<?php echo sprintf( __( 'Payment for %s' ), esc_js( $name ) ); ?>',
 				    item_list: {
 					items: [
 					    {

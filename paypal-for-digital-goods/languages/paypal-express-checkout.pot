@@ -480,29 +480,29 @@ msgstr ""
 msgid "Please <a href=\"%s\">click here</a> to download the file."
 msgstr ""
 
-#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:54
+#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:67
 msgid "Error: product ID is invalid."
 msgstr ""
 
-#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:61
+#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:74
 #, php-format
 msgid "Can't find product with ID %s"
 msgstr ""
 
-#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:89
+#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:102
 msgid "Please specify a digital url for your product"
 msgstr ""
 
-#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:115
+#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:128
 #, php-format
 msgid "Please enter %s Client ID in the settings."
 msgstr ""
 
-#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:142
+#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:155
 msgid "Error occurred"
 msgstr ""
 
-#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:211
+#: paypal-for-digital-goods/public/includes/class-shortcode-ppdg.php:224
 #, php-format
 msgid "Payment for %s"
 msgstr ""

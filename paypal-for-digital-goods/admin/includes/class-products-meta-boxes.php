@@ -15,6 +15,7 @@ class PPECProductsMetaboxes {
     function add_meta_boxes() {
 	add_meta_box( 'wsp_content', __( 'Description', 'paypal-express-checkout' ), array( $this, 'display_description_meta_box' ), PPECProducts::$products_slug, 'normal', 'default' );
 	add_meta_box( 'ppec_price_meta_box', esc_html( __( 'Price', 'paypal-express-checkout' ) ), array( $this, 'display_price_meta_box' ), PPECProducts::$products_slug, 'normal', 'default' );
+	add_meta_box( 'ppec_quantity_meta_box', esc_html( __( 'Quantity', 'paypal-express-checkout' ) ), array( $this, 'display_quantity_meta_box' ), PPECProducts::$products_slug, 'normal', 'default' );
 	add_meta_box( 'ppec_upload_meta_box', __( 'Download URL', 'paypal-express-checkout' ), array( $this, 'display_upload_meta_box' ), PPECProducts::$products_slug, 'normal', 'default' );
 	add_meta_box( 'ppec_shortcode_meta_box', __( 'Shortcode', 'paypal-express-checkout' ), array( $this, 'display_shortcode_meta_box' ), PPECProducts::$products_slug, 'side', 'default' );
     }
@@ -32,6 +33,17 @@ class PPECProductsMetaboxes {
 	<br/>
 	<input type="text" name="ppec_product_price" value="<?php echo $current_price; ?>">
 	<p class="description"><?php echo __( 'Item price. Numbers only, no need to put currency symbol. Example: 99.95', 'paypal-express-checkout' ); ?></p>
+	<?php
+    }
+
+    function display_quantity_meta_box( $post ) {
+	$current_val	 = get_post_meta( $post->ID, 'ppec_product_quantity', true );
+	$current_val	 = empty( $current_val ) ? 1 : $current_val;
+	?>
+	<label><?php _e( 'Quantity', 'stripe-payments' ); ?></label>
+	<br/>
+	<input type="number" name="ppec_product_quantity" value="<?php echo $current_val; ?>">
+	<p class="description"><?php echo __( 'Item quantity', 'paypal-express-checkout' ); ?></p>
 	<?php
     }
 
@@ -133,6 +145,11 @@ class PPECProductsMetaboxes {
 	    $text = __( 'Ivalid product price.', 'paypal-express-checkout' );
 	    $this->PPECAdmin->add_admin_notice( $text, 'error' );
 	}
+
+	//quantity
+	$quantity	 = filter_input( INPUT_POST, 'ppec_product_quantity', FILTER_SANITIZE_NUMBER_INT );
+	$quantity	 = empty( $quantity ) ? 1 : $quantity;
+	update_post_meta( $post_id, 'ppec_product_quantity', $quantity );
     }
 
 }

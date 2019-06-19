@@ -76,12 +76,13 @@ class PPDGShortcode {
 	    return $err;
 	}
 
-	$title	 = get_the_title( $post_id );
-	$price	 = get_post_meta( $post_id, 'ppec_product_price', true );
-	$url	 = get_post_meta( $post_id, 'ppec_product_upload', true );
-	$content = get_the_content( null, false, $post_id );
-	$sc	 = sprintf( '[paypal_for_digital_goods name="%s" price="%s" url="%s"]%s[/paypal_for_digital_goods]', $title, $price, $url, $content );
-	$output	 = do_shortcode( $sc );
+	$title		 = get_the_title( $post_id );
+	$price		 = get_post_meta( $post_id, 'ppec_product_price', true );
+	$quantity	 = get_post_meta( $post_id, 'ppec_product_quantity', true );
+	$url		 = get_post_meta( $post_id, 'ppec_product_upload', true );
+	$content	 = get_the_content( null, false, $post_id );
+	$sc		 = sprintf( '[paypal_for_digital_goods name="%s" price="%s" quantity="%d" url="%s"]%s[/paypal_for_digital_goods]', $title, $price, $quantity, $url, $content );
+	$output		 = do_shortcode( $sc );
 	return $output;
     }
 

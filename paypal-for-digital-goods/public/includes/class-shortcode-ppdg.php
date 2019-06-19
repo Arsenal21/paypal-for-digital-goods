@@ -91,7 +91,7 @@ class PPDGShortcode {
 	extract( shortcode_atts( array(
 	    'name'		 => 'Item Name',
 	    'price'		 => '0',
-	    'quantity'	 => '1',
+	    'quantity'	 => 1,
 	    'url'		 => '',
 	    'currency'	 => $this->ppdg->get_setting( 'currency_code' ),
 	    'btn_shape'	 => $this->ppdg->get_setting( 'btn_shape' ) !== false ? $this->ppdg->get_setting( 'btn_shape' ) : 'pill',
@@ -130,6 +130,8 @@ class PPDGShortcode {
 	    $err	 = $this->show_err_msg( $err_msg );
 	    return $err;
 	}
+
+	$quantity = empty( $quantity ) ? 1 : $quantity;
 
 	$output = '';
 

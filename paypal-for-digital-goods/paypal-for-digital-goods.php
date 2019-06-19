@@ -133,5 +133,5 @@ function wp_ppdg_process_payment() {
 
     echo json_encode( $res );
 
-    wp_die();
+    exit;
 }

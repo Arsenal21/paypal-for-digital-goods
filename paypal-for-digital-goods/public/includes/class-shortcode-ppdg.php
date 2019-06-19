@@ -18,6 +18,9 @@ class PPDGShortcode {
     function __construct() {
 	$this->ppdg = PPDG::get_instance();
 
+	//handle single product page display
+	add_filter( 'the_content', array( $this, 'filter_post_type_content' ) );
+
 	add_shortcode( 'paypal_for_digital_goods', array( $this, 'shortcode_paypal_for_digital_goods' ) );
 	add_shortcode( 'ppdg_checkout', array( $this, 'shortcode_ppdg_checkout' ) );
 
@@ -45,6 +48,16 @@ class PPDGShortcode {
 	return self::$instance;
     }
 
+    public static function filter_post_type_content( $content ) {
+	global $post;
+	if ( isset( $post ) ) {
+	    if ( $post->post_type === PPECProducts::$products_slug ) {//Handle the content for product type post
+		return do_shortcode( '[paypal_express_checkout product_id="' . $post->ID . '" is_post_tpl="1" in_the_loop="' . +in_the_loop() . '"]' );
+	    }
+	}
+	return $content;
+    }
+
     private function show_err_msg( $msg ) {
 	return sprintf( '<div class="ppec-error-msg" style="color: red;">%s</div>', $msg );
     }
@@ -69,7 +82,7 @@ class PPDGShortcode {
 	$content = get_the_content( null, false, $post_id );
 	$sc	 = sprintf( '[paypal_for_digital_goods name="%s" price="%s" url="%s"]%s[/paypal_for_digital_goods]', $title, $price, $url, $content );
 	$output	 = do_shortcode( $sc );
-	echo $output;
+	return $output;
     }
 
     function shortcode_paypal_for_digital_goods( $atts, $content = "" ) {
@@ -178,7 +191,7 @@ class PPDGShortcode {
 	    }
 	}
 	$content = wpautop( do_shortcode( $content ) );
-	echo $content;
+	$output	 .= $content;
 	?>
 	<div id="<?php echo $button_id; ?>"></div>
 

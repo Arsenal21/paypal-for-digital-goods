@@ -38,13 +38,13 @@ if ( ! current_user_can( 'manage_options' ) ) {
 
 	<?php do_settings_sections( 'paypal-for-digital-goods' ); ?>
 	<div style="background-color: white; padding: 10px; border: 1px dashed silver;">
-	    To get your client ID or set up a new one:<br/>
+	    <?php _e( 'To get your client ID or set up a new one:', 'paypal-express-checkout' ); ?><br/>
 	    <ol>
-		<li>Navigate to <a href="https://developer.paypal.com/developer/applications/" target="_blank">My Apps &amp; Credentials</a> and click <strong>Log into Dashboard</strong> in the top, right corner of the page.</li>
-		<li>Scroll down to <strong>REST API Apps</strong> and click the name of your app to see the app's details. If you don't have any apps, create one now:<br>
-		    a. Click <strong>Create App</strong>.<br>
-		    b. In <strong>App Name</strong>, enter a name and then click <strong>Create App</strong> again. The app is created and your client ID is displayed.</li>
-		<li>Click the <strong>Sandbox</strong> / <strong>Live</strong> toggle to display and copy the client ID for each environment.</li>
+		<li><?php _e( 'Navigate to <a href="https://developer.paypal.com/developer/applications/" target="_blank">My Apps &amp; Credentials</a> and click <strong>Log into Dashboard</strong> in the top, right corner of the page.', 'paypal-express-checkout' ); ?></li>
+		<li><?php _e( 'Scroll down to <strong>REST API Apps</strong> and click the name of your app to see the app\'s details. If you don\'t have any apps, create one now:', 'paypal-express-checkout' ); ?><br>
+		    <?php _e( 'a. Click <strong>Create App</strong>.', 'paypal-express-checkout' ); ?><br>
+		    <?php _e( 'b. In <strong>App Name</strong>, enter a name and then click <strong>Create App</strong> again. The app is created and your client ID is displayed.', 'paypal-express-checkout' ); ?></li>
+		<li><?php _e( 'Click the <strong>Sandbox</strong> / <strong>Live</strong> toggle to display and copy the client ID for each environment.', 'paypal-express-checkout' ); ?></li>
 	    </ol>
 	</div>
 

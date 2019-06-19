@@ -68,7 +68,7 @@ class PPDG {
     }
 
     public function enqueue_styles() {
-	wp_register_style( 'wp-ppdg-jquery-ui-style', plugin_dir_url( __FILE__ ) . 'assets/css/smoothness/jquery-ui.min.css' );
+	wp_register_style( 'wp-ppdg-jquery-ui-style', WP_PPEC_PLUGIN_URL . '/public/assets/css/smoothness/jquery-ui.min.css' );
     }
 
     public function get_setting( $field ) {
@@ -267,7 +267,7 @@ class PPDG {
      */
     public function load_plugin_textdomain() {
 
-	$domain	 = $this->plugin_slug;
+	$domain	 = 'paypal-express-checkout';
 	$locale	 = apply_filters( 'plugin_locale', get_locale(), $domain );
 
 	load_textdomain( $domain, trailingslashit( WP_LANG_DIR ) . $domain . '/' . $domain . '-' . $locale . '.mo' );

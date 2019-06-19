@@ -114,7 +114,7 @@ class PPECProductsMetaboxes {
 
 	//download url
 	$product_url = filter_input( INPUT_POST, 'ppec_product_upload', FILTER_SANITIZE_URL );
-	if ( empty( $url ) ) {
+	if ( empty( $product_url ) ) {
 	    //url is empty
 	    $text = __( 'Please specify product download URL.', 'paypal-express-checkout' );
 	    $this->PPECAdmin->add_admin_notice( $text, 'error' );

@@ -79,9 +79,10 @@ class PPDGShortcode {
 	$title		 = get_the_title( $post_id );
 	$price		 = get_post_meta( $post_id, 'ppec_product_price', true );
 	$quantity	 = get_post_meta( $post_id, 'ppec_product_quantity', true );
+	$custom_quantity = get_post_meta( $post_id, 'ppec_product_custom_quantity', true );
 	$url		 = get_post_meta( $post_id, 'ppec_product_upload', true );
 	$content	 = get_the_content( null, false, $post_id );
-	$sc		 = sprintf( '[paypal_for_digital_goods name="%s" price="%s" quantity="%d" url="%s"]%s[/paypal_for_digital_goods]', $title, $price, $quantity, $url, $content );
+	$sc		 = sprintf( '[paypal_for_digital_goods name="%s" price="%s" quantity="%d" custom_quantity="%d" url="%s"]%s[/paypal_for_digital_goods]', $title, $price, $quantity, $custom_quantity, $url, $content );
 	$output		 = do_shortcode( $sc );
 	return $output;
     }
@@ -89,15 +90,16 @@ class PPDGShortcode {
     function shortcode_paypal_for_digital_goods( $atts, $content = "" ) {
 
 	extract( shortcode_atts( array(
-	    'name'		 => 'Item Name',
-	    'price'		 => '0',
-	    'quantity'	 => 1,
-	    'url'		 => '',
-	    'currency'	 => $this->ppdg->get_setting( 'currency_code' ),
-	    'btn_shape'	 => $this->ppdg->get_setting( 'btn_shape' ) !== false ? $this->ppdg->get_setting( 'btn_shape' ) : 'pill',
-	    'btn_type'	 => $this->ppdg->get_setting( 'btn_type' ) !== false ? $this->ppdg->get_setting( 'btn_type' ) : 'checkout',
-	    'btn_size'	 => $this->ppdg->get_setting( 'btn_size' ) !== false ? $this->ppdg->get_setting( 'btn_size' ) : 'small',
-	    'btn_color'	 => $this->ppdg->get_setting( 'btn_color' ) !== false ? $this->ppdg->get_setting( 'btn_color' ) : 'gold',
+	    'name'			 => 'Item Name',
+	    'price'			 => '0',
+	    'quantity'		 => 1,
+	    'url'			 => '',
+	    'custom_quantity'	 => 0,
+	    'currency'		 => $this->ppdg->get_setting( 'currency_code' ),
+	    'btn_shape'		 => $this->ppdg->get_setting( 'btn_shape' ) !== false ? $this->ppdg->get_setting( 'btn_shape' ) : 'pill',
+	    'btn_type'		 => $this->ppdg->get_setting( 'btn_type' ) !== false ? $this->ppdg->get_setting( 'btn_type' ) : 'checkout',
+	    'btn_size'		 => $this->ppdg->get_setting( 'btn_size' ) !== false ? $this->ppdg->get_setting( 'btn_size' ) : 'small',
+	    'btn_color'		 => $this->ppdg->get_setting( 'btn_color' ) !== false ? $this->ppdg->get_setting( 'btn_color' ) : 'gold',
 	), $atts ) );
 	if ( empty( $url ) ) {
 	    $err_msg = __( "Please specify a digital url for your product", 'paypal-express-checkout' );
@@ -108,12 +110,19 @@ class PPDGShortcode {
 	$button_id		 = 'paypal_button_' . count( self::$payment_buttons );
 	self::$payment_buttons[] = $button_id;
 
+	$quantity = empty( $quantity ) ? 1 : $quantity;
+
 	$trans_name = 'wp-ppdg-' . sanitize_title_with_dashes( $name ); //Create key using the item name.
 
-	set_transient( $trans_name . '-price', $price, 2 * 3600 ); //Save the price for this item for 2 hours.
-	set_transient( $trans_name . '-currency', $currency, 2 * 3600 );
-	set_transient( $trans_name . '-quantity', $quantity, 2 * 3600 );
-	set_transient( $trans_name . '-url', $url, 2 * 3600 );
+	$trans_data = array(
+	    'price'			 => $price,
+	    'currency'		 => $currency,
+	    'quantity'		 => $quantity,
+	    'url'			 => $url,
+	    'custom_quantity'	 => $custom_quantity,
+	);
+
+	set_transient( $trans_name, $trans_data, 2 * 3600 );
 
 	$is_live = $this->ppdg->get_setting( 'is_live' );
 
@@ -130,8 +139,6 @@ class PPDGShortcode {
 	    $err	 = $this->show_err_msg( $err_msg );
 	    return $err;
 	}
-
-	$quantity = empty( $quantity ) ? 1 : $quantity;
 
 	$output = '';
 
@@ -196,11 +203,10 @@ class PPDGShortcode {
 	$content = wpautop( do_shortcode( $content ) );
 	$output	 .= $content;
 	?>
-	<div id="<?php echo $button_id; ?>"></div>
+	<div id="<?php echo $button_id; ?>" data-ppec-custom-quantity="<?php echo $custom_quantity; ?>"></div>
 
 	<script>
 	    paypal.Button.render({
-
 		env: '<?php echo $env; ?>',
 		client: {
 	<?php echo $env; ?>: '<?php echo $client_id; ?>',
@@ -217,7 +223,12 @@ class PPDGShortcode {
 
 		commit: true,
 
+		onInit: function (data, actions) {
+		    alert('blah');
+		},
+
 		payment: function (data, actions) {
+		    var buttonId = '<?php echo $button_id; ?>';
 		    return actions.payment.create({
 			payment: {
 			    intent: 'sale',

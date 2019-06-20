@@ -69,27 +69,28 @@ function wp_ppdg_process_payment() {
     }
     $payment = $_POST[ 'wp_ppdg_payment' ];
 
-    if ( $payment[ 'state' ] !== 'approved' ) {
+    if ( strtoupper( $payment[ 'status' ] ) !== 'COMPLETED' ) {
 	//payment is unsuccessful
-	printf( __( 'Payment is not approved. State: %s', 'paypal-express-checkout' ), $payment[ 'state' ] );
+	printf( __( 'Payment is not approved. Status: %s', 'paypal-express-checkout' ), $payment[ 'status' ] );
 	exit;
     }
 
     // get item name
-    $item_name	 = $payment[ 'transactions' ][ 0 ][ 'item_list' ][ 'items' ][ 0 ][ 'name' ];
+    $item_name	 = $payment[ 'purchase_units' ][ 0 ][ 'description' ];
     // let's check if the payment matches transient data
     $trans_name	 = 'wp-ppdg-' . sanitize_title_with_dashes( $item_name );
-    $price		 = get_transient( $trans_name . '-price' );
-    if ( $price === false ) {
+    $trans		 = get_transient( $trans_name );
+    if ( ! $trans ) {
 	//no price set
-	_e( 'No price set in transient.', 'paypal-express-checkout' );
+	_e( 'No transaction info found in transient.', 'paypal-express-checkout' );
 	exit;
     }
-    $quantity	 = get_transient( $trans_name . '-quantity' );
-    $currency	 = get_transient( $trans_name . '-currency' );
-    $url		 = get_transient( $trans_name . '-url' );
+    $price		 = $trans[ 'price' ];
+    $quantity	 = $trans[ 'quantity' ];
+    $currency	 = $trans[ 'currency' ];
+    $url		 = $trans[ 'url' ];
 
-    $amount = $payment[ 'transactions' ][ 0 ][ 'amount' ][ 'total' ];
+    $amount = $payment[ 'purchase_units' ][ 0 ][ 'amount' ][ 'value' ];
 
     //check if amount paid matches price x quantity
     if ( $amount != $price * $quantity ) {
@@ -99,7 +100,7 @@ function wp_ppdg_process_payment() {
     }
 
     //check if payment currency matches
-    if ( $payment[ 'transactions' ][ 0 ][ 'amount' ][ 'currency' ] !== $currency ) {
+    if ( $payment[ 'purchase_units' ][ 0 ][ 'amount' ][ 'currency_code' ] !== $currency ) {
 	//payment currency mismatch
 	_e( 'Payment currency mismatch.', 'paypal-express-checkout' );
 	exit;
@@ -115,7 +116,7 @@ function wp_ppdg_process_payment() {
 	'quantity'	 => $quantity,
 	'amount'	 => $amount,
 	'currency'	 => $currency,
-	'state'		 => $payment[ 'state' ],
+	'state'		 => $payment[ 'status' ],
 	'id'		 => $payment[ 'id' ],
 	'create_time'	 => $payment[ 'create_time' ],
     ), $payment[ 'payer' ] );

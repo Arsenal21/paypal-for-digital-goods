@@ -98,7 +98,9 @@ class PPDGShortcode {
 	    'currency'		 => $this->ppdg->get_setting( 'currency_code' ),
 	    'btn_shape'		 => $this->ppdg->get_setting( 'btn_shape' ) !== false ? $this->ppdg->get_setting( 'btn_shape' ) : 'pill',
 	    'btn_type'		 => $this->ppdg->get_setting( 'btn_type' ) !== false ? $this->ppdg->get_setting( 'btn_type' ) : 'checkout',
-	    'btn_size'		 => $this->ppdg->get_setting( 'btn_size' ) !== false ? $this->ppdg->get_setting( 'btn_size' ) : 'small',
+	    'btn_height'		 => $this->ppdg->get_setting( 'btn_height' ) !== false ? $this->ppdg->get_setting( 'btn_height' ) : 'small',
+	    'btn_width'		 => $this->ppdg->get_setting( 'btn_width' ) !== false ? $this->ppdg->get_setting( 'btn_width' ) : 0,
+	    'btn_layout'		 => $this->ppdg->get_setting( 'btn_layout' ) !== false ? $this->ppdg->get_setting( 'btn_layout' ) : 'horizontal',
 	    'btn_color'		 => $this->ppdg->get_setting( 'btn_color' ) !== false ? $this->ppdg->get_setting( 'btn_color' ) : 'gold',
 	), $atts ) );
 	if ( empty( $url ) ) {
@@ -140,18 +142,52 @@ class PPDGShortcode {
 	    return $err;
 	}
 
-	$output = '';
+	$btn_sizes = array( 'small' => 25, 'medium' => 35, 'large' => 45, 'xlarge' => 55 );
+
+	if ( isset( $btn_sizes[ $btn_height ] ) ) {
+	    $btn_height = $btn_sizes[ $btn_height ];
+	} else {
+	    $btn_height = 25;
+	}
+
+	$output	 = '';
+	$output	 .= '<div style="position: relative;"><div class="wp-ppec-overlay" style="z-index: 10000;display: none;background-color: white;width: 100%;opacity: 0.7;height: 100%;position: absolute;top: 0;left: 0;" data-ppce-button-id="' . $button_id . '"></div>';
 
 	if ( count( self::$payment_buttons ) <= 1 ) {
 	    // insert the below only once on a page
 	    ob_start();
+	    $args			 = array();
+	    $args[ 'client-id' ]	 = $client_id;
+	    $args[ 'intent' ]	 = 'capture';
+	    $disabled_funding	 = $this->ppdg->get_setting( 'disabled_funding' );
+	    if ( ! empty( $disabled_funding ) ) {
+		$arg = '';
+		foreach ( $disabled_funding as $funding ) {
+		    $arg .= $funding . ',';
+		}
+		$arg				 = rtrim( $arg, ',' );
+		$args[ 'disable-funding' ]	 = $arg;
+	    }
+	    //check if cards aren't disabled globally first
+	    if ( ! in_array( 'card', $disabled_funding ) ) {
+		$disabled_cards = $this->ppdg->get_setting( 'disabled_cards' );
+		if ( ! empty( $disabled_cards ) ) {
+		    $arg = '';
+		    foreach ( $disabled_cards as $card ) {
+			$arg .= $card . ',';
+		    }
+		    $arg			 = rtrim( $arg, ',' );
+		    $args[ 'disable-card' ]	 = $arg;
+		}
+	    }
+	    $script_url	 = add_query_arg( $args, 'https://www.paypal.com/sdk/js' );
+	    printf( '<script src="%s"></script>', $script_url );
 	    ?>
 	    <div id="wp-ppdg-dialog-message" title="">
 	        <p id="wp-ppdg-dialog-msg"></p>
 	    </div>
-	    <script src="https://www.paypalobjects.com/api/checkout.js"></script>
 	    <script>
-	        function wp_ppdg_process_payment(payment) {
+	        function wp_ppdg_process_payment(payment, buttonId) {
 	    	//	    	console.log("payment details:");
 	    	//	    	console.log(payment);
 	    	jQuery.post("<?php echo get_admin_url(); ?>admin-ajax.php", {action: "wp_ppdg_process_payment", wp_ppdg_payment: payment})
@@ -170,18 +206,22 @@ class PPDGShortcode {
 	    		    jQuery('p#wp-ppdg-dialog-msg').html(dlgMsg);
 	    		    jQuery("#wp-ppdg-dialog-message").dialog({
 	    			modal: true,
+	    			width: 'auto',
+	    			draggable: false,
+	    			resizable: false,
 	    			buttons: {
 	    			    Ok: function () {
 	    				jQuery(this).dialog("close");
 	    			    }
 	    			}
 	    		    });
+	    		    jQuery('div.wp-ppec-overlay[data-ppce-button-id="' + buttonId + '"]').hide();
 	    		    return ret;
 	    		});
 	        }
 	    </script>
 	    <?php
-	    $output .= ob_get_clean();
+	    $output		 .= ob_get_clean();
 	}
 
 	wp_enqueue_script( 'jquery-ui-dialog' );
@@ -202,34 +242,62 @@ class PPDGShortcode {
 	}
 	$content = wpautop( do_shortcode( $content ) );
 	$output	 .= $content;
-	?>
-	<div id="<?php echo $button_id; ?>" data-ppec-custom-quantity="<?php echo $custom_quantity; ?>"></div>
 
+	$output	 .= sprintf( '<div id = "%s"%s data-ppec-custom-quantity = "%d"></div>', $button_id, $btn_width ? 'style="width: ' . $btn_width . 'px"' : '', $custom_quantity );
+	?>
 	<script>
-	    paypal.Button.render({
+	    var ppecStyleOpts = {
+		height: <?php echo $btn_height; ?>,
+		shape: '<?php echo $btn_shape; ?>',
+		label: '<?php echo $btn_type; ?>',
+		color: '<?php echo $btn_color; ?>',
+		layout: '<?php echo $btn_layout; ?>'
+	    };
+	    if (ppecStyleOpts.layout === 'horizontal') {
+		ppecStyleOpts.tagline = false;
+	    }
+	    paypal.Buttons({
 		env: '<?php echo $env; ?>',
 		client: {
 	<?php echo $env; ?>: '<?php echo $client_id; ?>',
 		},
-
-		style: {
-		    tagline: false,
-		    branding: true,
-		    shape: '<?php echo $btn_shape; ?>',
-		    label: '<?php echo $btn_type; ?>',
-		    size: '<?php echo $btn_size; ?>',
-		    color: '<?php echo $btn_color; ?>'
-		},
-
+		style: ppecStyleOpts,
 		commit: true,
-
-		onInit: function (data, actions) {
-		    alert('blah');
+		createOrder: function (data, actions) {
+		    return actions.order.create({
+			purchase_units: [{
+				amount: {
+				    value: '<?php echo $price * $quantity; ?>',
+				    currency_code: '<?php echo $currency; ?>',
+				    breakdown: {
+					item_total: {
+					    currency_code: '<?php echo $currency; ?>',
+					    value: '<?php echo $price * $quantity; ?>'
+					}
+				    }
+				},
+				items: [{
+					name: '<?php echo esc_js( $name ); ?>',
+					quantity: '<?php echo $quantity; ?>',
+					unit_amount: {
+					    value: '<?php echo $price; ?>',
+					    currency_code: '<?php echo $currency; ?>'
+					},
+				    }]
+			    }]
+		    });
 		},
-
+		onApprove: function (data, actions) {
+		    var buttonId = '<?php echo $button_id; ?>';
+		    jQuery('div.wp-ppec-overlay[data-ppce-button-id="' + buttonId + '"]').show();
+		    return actions.order.capture().then(function (details) {
+			console.log(details);
+			wp_ppdg_process_payment(details, buttonId);
+		    });
+		},
 		payment: function (data, actions) {
 		    var buttonId = '<?php echo $button_id; ?>';
-		    return actions.payment.create({
+		    return actions.order.create({
 			payment: {
 			    intent: 'sale',
 			    transactions: [
@@ -259,11 +327,11 @@ class PPDGShortcode {
 		onError: function (err) {
 		    alert(err);
 		}
-
-	    }, '#<?php echo $button_id; ?>');
+	    }).render('#<?php echo $button_id; ?>');
 	</script>
 	<?php
 	$output	 .= ob_get_clean();
+	$output	 .= '</div></div>';
 	return $output;
     }
 

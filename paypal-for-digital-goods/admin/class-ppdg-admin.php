@@ -280,8 +280,8 @@ class PPDG_Admin {
 	$output[ 'btn_type' ]	 = $input[ 'btn_type' ];
 	$output[ 'btn_shape' ]	 = $input[ 'btn_shape' ];
 
-	$output[ 'disabled_funding' ]	 = $input[ 'disabled_funding' ];
-	$output[ 'disabled_cards' ]	 = $input[ 'disabled_cards' ];
+	$output[ 'disabled_funding' ]	 = empty( $input[ 'disabled_funding' ] ) ? array() : $input[ 'disabled_funding' ];
+	$output[ 'disabled_cards' ]	 = empty( $input[ 'disabled_cards' ] ) ? array() : $input[ 'disabled_cards' ];
 
 
 	if ( ! empty( $input[ 'currency_code' ] ) )

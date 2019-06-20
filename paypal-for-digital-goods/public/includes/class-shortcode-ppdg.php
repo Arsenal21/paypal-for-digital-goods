@@ -243,7 +243,7 @@ class PPDGShortcode {
 	$content = wpautop( do_shortcode( $content ) );
 	$output	 .= $content;
 
-	$output	 .= sprintf( '<div id = "%s"%s data-ppec-custom-quantity = "%d"></div>', $button_id, $btn_width ? 'style="width: ' . $btn_width . 'px"' : '', $custom_quantity );
+	$output	 .= sprintf( '<div id = "%s"style="margin: 0 auto;%s"  data-ppec-custom-quantity = "%d"></div>', $button_id, $btn_width ? ' width: ' . $btn_width . 'px;' : '', $custom_quantity );
 	?>
 	<script>
 	    var ppecStyleOpts = {

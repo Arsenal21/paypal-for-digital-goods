@@ -40,7 +40,7 @@ class PPECProducts {
 	    'not_found'		 => __( 'Not found', 'paypal-express-checkout' ),
 	    'not_found_in_trash'	 => __( 'Not found in Trash', 'paypal-express-checkout' ),
 	);
-	$menu_icon	 = 'dashicons-clipboard'; //WP_ASP_PLUGIN_URL . '/assets/asp-dashboard-menu-icon.png';
+	$menu_icon	 = WP_PPEC_PLUGIN_URL . '/admin/assets/img/ppec-dashicon.png';
 	$slug		 = untrailingslashit( self::$products_slug );
 	$args		 = array(
 	    'labels'		 => $labels,

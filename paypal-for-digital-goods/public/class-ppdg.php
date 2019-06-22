@@ -68,7 +68,8 @@ class PPDG {
     }
 
     public function enqueue_styles() {
-	wp_register_style( 'wp-ppdg-jquery-ui-style', WP_PPEC_PLUGIN_URL . '/public/assets/css/smoothness/jquery-ui.min.css' );
+	wp_register_style( 'wp-ppec-jquery-ui-style', WP_PPEC_PLUGIN_URL . '/public/assets/css/smoothness/jquery-ui.min.css' );
+	wp_register_style( 'wp-ppec-frontend-style', WP_PPEC_PLUGIN_URL . '/public/assets/css/public.css' );
     }
 
     public function get_setting( $field ) {

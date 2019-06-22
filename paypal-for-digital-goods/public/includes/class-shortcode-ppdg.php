@@ -150,8 +150,17 @@ class PPDGShortcode {
 	    $btn_height = 25;
 	}
 
-	$output	 = '';
-	$output	 .= '<div style="position: relative;"><div class="wp-ppec-overlay" style="z-index: 10000;display: none;background-color: white;width: 100%;opacity: 0.7;height: 100%;position: absolute;top: 0;left: 0;" data-ppce-button-id="' . $button_id . '"></div>';
+	$output = '';
+
+	$output .= '<div style="position: relative;">'
+	. '<div class="wp-ppec-overlay" data-ppce-button-id="' . $button_id . '">'
+	. '<div class="wp-ppec-spinner">'
+	. '<div></div>'
+	. '<div></div>'
+	. '<div></div>'
+	. '<div></div>'
+	. '</div>'
+	. '</div>';
 
 	if ( count( self::$payment_buttons ) <= 1 ) {
 	    // insert the below only once on a page
@@ -225,7 +234,8 @@ class PPDGShortcode {
 	}
 
 	wp_enqueue_script( 'jquery-ui-dialog' );
-	wp_enqueue_style( 'wp-ppdg-jquery-ui-style' );
+	wp_enqueue_style( 'wp-ppec-jquery-ui-style' );
+	wp_enqueue_style( 'wp-ppec-frontend-style' );
 
 	ob_start();
 
@@ -289,7 +299,7 @@ class PPDGShortcode {
 		},
 		onApprove: function (data, actions) {
 		    var buttonId = '<?php echo $button_id; ?>';
-		    jQuery('div.wp-ppec-overlay[data-ppce-button-id="' + buttonId + '"]').show();
+		    jQuery('div.wp-ppec-overlay[data-ppce-button-id="' + buttonId + '"]').css('display', 'flex');
 		    return actions.order.capture().then(function (details) {
 			console.log(details);
 			wp_ppdg_process_payment(details, buttonId);

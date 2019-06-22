@@ -90,6 +90,11 @@ function wp_ppdg_process_payment() {
     $currency	 = $trans[ 'currency' ];
     $url		 = $trans[ 'url' ];
 
+    if ( $trans[ 'custom_quantity' ] ) {
+	//custom quantity enabled. let's take quantity from PayPal results
+	$quantity = $payment[ 'purchase_units' ][ 0 ][ 'items' ][ 0 ][ 'quantity' ];
+    }
+
     $amount = $payment[ 'purchase_units' ][ 0 ][ 'amount' ][ 'value' ];
 
     //check if amount paid matches price x quantity

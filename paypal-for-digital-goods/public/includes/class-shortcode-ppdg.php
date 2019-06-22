@@ -59,7 +59,7 @@ class PPDGShortcode {
     }
 
     private function show_err_msg( $msg ) {
-	return sprintf( '<div class="ppec-error-msg" style="color: red;">%s</div>', $msg );
+	return sprintf( '<div class="wp-ppec-error-msg" style="color: red;">%s</div>', $msg );
     }
 
     function shortcode_paypal_express_checkout( $atts ) {
@@ -152,8 +152,8 @@ class PPDGShortcode {
 
 	$output = '';
 
-	$output .= '<div style="position: relative;">'
-	. '<div class="wp-ppec-overlay" data-ppce-button-id="' . $button_id . '">'
+	$output .= '<div style="position: relative;" class="wp-ppec-shortcode-container" data-ppec-button-id="' . $button_id . '">'
+	. '<div class="wp-ppec-overlay" data-ppec-button-id="' . $button_id . '">'
 	. '<div class="wp-ppec-spinner">'
 	. '<div></div>'
 	. '<div></div>'
@@ -165,6 +165,18 @@ class PPDGShortcode {
 	if ( count( self::$payment_buttons ) <= 1 ) {
 	    // insert the below only once on a page
 	    ob_start();
+
+	    $frontVars		 = array(
+		'str'		 => array(
+		    'errorOccurred'	 => __( 'Error occurred', 'paypal-express-checkout' ),
+		    'paymentFor'	 => __( 'Payment for', 'paypal-express-checkout' ),
+		    'enterQuantity'	 => __( 'Please enter valid quantity', 'paypal-express-checkout' ),
+		),
+		'ajaxUrl'	 => get_admin_url() . 'admin-ajax.php'
+	    );
+	    ?>
+	    <script>var ppecFrontVars = <?php echo json_encode( $frontVars ); ?>;</script>
+	    <?php
 	    $args			 = array();
 	    $args[ 'client-id' ]	 = $client_id;
 	    $args[ 'intent' ]	 = 'capture';
@@ -195,49 +207,9 @@ class PPDGShortcode {
 	    <div id="wp-ppdg-dialog-message" title="">
 	        <p id="wp-ppdg-dialog-msg"></p>
 	    </div>
-	    <script>
-	        function wp_ppdg_process_payment(payment, buttonId) {
-	    	//	    	console.log("payment details:");
-	    	//	    	console.log(payment);
-	    	jQuery.post("<?php echo get_admin_url(); ?>admin-ajax.php", {action: "wp_ppdg_process_payment", wp_ppdg_payment: payment})
-	    		.done(function (data) {
-	    		    var ret = true;
-	    		    try {
-	    			var res = JSON.parse(data);
-	    			dlgTitle = res.title;
-	    			dlgMsg = res.msg;
-	    		    } catch (e) {
-	    			dlgTitle = "<?php _e( 'Error occurred', 'paypal-express-checkout' ); ?>";
-	    			dlgMsg = data;
-	    			ret = false;
-	    		    }
-	    		    jQuery('div#wp-ppdg-dialog-message').attr('title', dlgTitle);
-	    		    jQuery('p#wp-ppdg-dialog-msg').html(dlgMsg);
-	    		    jQuery("#wp-ppdg-dialog-message").dialog({
-	    			modal: true,
-	    			width: 'auto',
-	    			draggable: false,
-	    			resizable: false,
-	    			buttons: {
-	    			    Ok: function () {
-	    				jQuery(this).dialog("close");
-	    			    }
-	    			}
-	    		    });
-	    		    jQuery('div.wp-ppec-overlay[data-ppce-button-id="' + buttonId + '"]').hide();
-	    		    return ret;
-	    		});
-	        }
-	    </script>
 	    <?php
 	    $output		 .= ob_get_clean();
 	}
-
-	wp_enqueue_script( 'jquery-ui-dialog' );
-	wp_enqueue_style( 'wp-ppec-jquery-ui-style' );
-	wp_enqueue_style( 'wp-ppec-frontend-style' );
-
-	ob_start();
 
 	//output content if needed
 
@@ -253,95 +225,43 @@ class PPDGShortcode {
 	$content = wpautop( do_shortcode( $content ) );
 	$output	 .= $content;
 
-	$output	 .= sprintf( '<div id = "%s"style="margin: 0 auto;%s"  data-ppec-custom-quantity = "%d"></div>', $button_id, $btn_width ? ' width: ' . $btn_width . 'px;' : '', $custom_quantity );
-	?>
-	<script>
-	    var ppecStyleOpts = {
-		height: <?php echo $btn_height; ?>,
-		shape: '<?php echo $btn_shape; ?>',
-		label: '<?php echo $btn_type; ?>',
-		color: '<?php echo $btn_color; ?>',
-		layout: '<?php echo $btn_layout; ?>'
-	    };
-	    if (ppecStyleOpts.layout === 'horizontal') {
-		ppecStyleOpts.tagline = false;
-	    }
-	    paypal.Buttons({
-		env: '<?php echo $env; ?>',
-		client: {
-	<?php echo $env; ?>: '<?php echo $client_id; ?>',
-		},
-		style: ppecStyleOpts,
-		commit: true,
-		createOrder: function (data, actions) {
-		    return actions.order.create({
-			purchase_units: [{
-				amount: {
-				    value: '<?php echo $price * $quantity; ?>',
-				    currency_code: '<?php echo $currency; ?>',
-				    breakdown: {
-					item_total: {
-					    currency_code: '<?php echo $currency; ?>',
-					    value: '<?php echo $price * $quantity; ?>'
-					}
-				    }
-				},
-				items: [{
-					name: '<?php echo esc_js( $name ); ?>',
-					quantity: '<?php echo $quantity; ?>',
-					unit_amount: {
-					    value: '<?php echo $price; ?>',
-					    currency_code: '<?php echo $currency; ?>'
-					},
-				    }]
-			    }]
-		    });
-		},
-		onApprove: function (data, actions) {
-		    var buttonId = '<?php echo $button_id; ?>';
-		    jQuery('div.wp-ppec-overlay[data-ppce-button-id="' + buttonId + '"]').css('display', 'flex');
-		    return actions.order.capture().then(function (details) {
-			console.log(details);
-			wp_ppdg_process_payment(details, buttonId);
-		    });
-		},
-		payment: function (data, actions) {
-		    var buttonId = '<?php echo $button_id; ?>';
-		    return actions.order.create({
-			payment: {
-			    intent: 'sale',
-			    transactions: [
-				{
-				    amount: {total: '<?php echo $price * $quantity; ?>', currency: '<?php echo $currency; ?>'},
-				    description: '<?php echo sprintf( __( 'Payment for %s' ), esc_js( $name ) ); ?>',
-				    item_list: {
-					items: [
-					    {
-						name: '<?php echo esc_js( $name ); ?>',
-						quantity: '<?php echo $quantity; ?>',
-						price: '<?php echo $price; ?>',
-						currency: '<?php echo $currency; ?>'
-					    }
-					]
-				    }
-				}
-			    ]
-			}
-		    });
-		},
-		onAuthorize: function (data, actions) {
-		    return actions.payment.execute().then(function (payment) {
-			return wp_ppdg_process_payment(payment);
-		    });
-		},
-		onError: function (err) {
-		    alert(err);
-		}
-	    }).render('#<?php echo $button_id; ?>');
-	</script>
-	<?php
-	$output	 .= ob_get_clean();
-	$output	 .= '</div></div>';
+	//custom quantity
+	if ( $custom_quantity ) {
+	    $output	 .= '<label>Quantity:</label>';
+	    $output	 .= '<input id="wp-ppec-custom-quantity" data-ppec-button-id="' . $button_id . '" type="number" name="custom-quantity" class="wp-ppec-input wp-ppec-custom-quantity" min="1" value="' . $quantity . '">';
+	    $output	 .= '<div class="wp-ppec-form-error-msg"></div>';
+	}
+
+	$output .= '<div class = "wp-ppec-button-container">';
+
+	$output .= sprintf( '<div id = "%s"style = "margin: 0 auto;%s"></div>  ', $button_id, $btn_width ? ' width: ' . $btn_width . 'px;
+	    ' : '' );
+
+	$output .= '</div>';
+
+	$data = array(
+	    'id'			 => $button_id,
+	    'env'			 => $env,
+	    'client_id'		 => $client_id,
+	    'price'			 => $price,
+	    'quantity'		 => $quantity,
+	    'custom_quantity'	 => $custom_quantity,
+	    'currency'		 => $currency,
+	    'name'			 => $name,
+	    'btnStyle'		 => array(
+		'height' => $btn_height,
+		'shape'	 => $btn_shape,
+		'label'	 => $btn_type,
+		'color'	 => $btn_color,
+		'layout' => $btn_layout,
+	    ),
+	);
+
+
+	$output .= '<script>jQuery(document).ready(function() {new ppecHandler(' . json_encode( $data ) . ')});</script>';
+
+	$output .= '</div>';
+
 	return $output;
     }
 

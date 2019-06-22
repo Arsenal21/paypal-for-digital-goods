@@ -51,3 +51,12 @@
     justify-content: center;
     align-items: center;
 }
+
+.wp-ppec-button-container {
+    margin: 10px 0;
+}
+
+.wp-ppec-form-error-msg {
+    display: none;
+    color: red;
+}

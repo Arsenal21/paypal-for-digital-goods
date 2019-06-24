@@ -165,8 +165,9 @@ class PPDG_Admin {
 	add_settings_section( 'ppdg-documentation', __( 'Plugin Documentation', 'paypal-express-checkout' ), array( $this, 'general_documentation_callback' ), $this->plugin_slug );
 
 	add_settings_section( 'ppdg-global-section', __( 'Global Settings', 'paypal-express-checkout' ), null, $this->plugin_slug );
-	add_settings_section( 'ppdg-button-style-section', __( 'Button Style', 'paypal-express-checkout' ), null, $this->plugin_slug );
 	add_settings_section( 'ppdg-credentials-section', __( 'PayPal Credentials', 'paypal-express-checkout' ), null, $this->plugin_slug );
+	add_settings_section( 'ppdg-button-style-section', __( 'Button Style', 'paypal-express-checkout' ), null, $this->plugin_slug );
+	add_settings_section( 'ppdg-disable-funding-section', __( 'Disable Funding', 'paypal-express-checkout' ), array( $this, 'disable_funding_note' ), $this->plugin_slug );
 
 	add_settings_field( 'currency_code', __( 'Currency Code', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-global-section', array( 'field' => 'currency_code', 'desc' => __( 'Example: USD, CAD etc', 'paypal-express-checkout' ), 'size' => 10 ) );
 
@@ -174,10 +175,16 @@ class PPDG_Admin {
 	add_settings_field( 'live_client_id', __( 'Live Client ID', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'live_client_id', 'desc' => '' ) );
 	add_settings_field( 'sandbox_client_id', __( 'Sandbox Client ID', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-credentials-section', array( 'field' => 'sandbox_client_id', 'desc' => '' ) );
 
+//disable funding section
+	add_settings_field( 'disabled_funding', __( 'Disabled Funding Options', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-disable-funding-section', array( 'field' => 'disabled_funding', 'desc' => '', 'vals' => array( 'card', 'credit', 'sepa' ), 'texts' => array( __( 'Credit or debit cards', 'paypal-express-checkout' ), __( 'PayPal Credit', 'paypal-express-checkout' ), __( 'SEPA-Lastschrift', 'paypal-express-checkout' ) ) ) );
+	add_settings_field( 'disabled_cards', __( 'Disabled Cards', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-disable-funding-section', array( 'field' => 'disabled_cards', 'desc' => '', 'vals' => array( 'visa', 'mastercard', 'amex', 'discover', 'jcb', 'elo', 'hiper' ), 'texts' => array( __( 'Visa', 'paypal-express-checkout' ), __( 'Mastercard', 'paypal-express-checkout' ), __( 'American Express', 'paypal-express-checkout' ), __( 'Discover', 'paypal-express-checkout' ), __( 'JCB', 'paypal-express-checkout' ), __( 'Elo', 'paypal-express-checkout' ), __( 'Hiper', 'paypal-express-checkout' ) ) ) );
+//button style section
 	add_settings_field( 'btn_type', __( 'Button Type', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_type', 'desc' => '', 'vals' => array( 'checkout', 'pay', 'paypal', 'buynow' ), 'texts' => array( __( 'Checkout', 'paypal-express-checkout' ), __( 'Pay', 'paypal-express-checkout' ), __( 'PayPal', 'paypal-express-checkout' ), __( 'Buy Now', 'paypal-express-checkout' ) ) ) );
 	add_settings_field( 'btn_shape', __( 'Button Shape', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_shape', 'desc' => '', 'vals' => array( 'pill', 'rect' ), 'texts' => array( __( 'Pill', 'paypal-express-checkout' ), __( 'Rectangle', 'paypal-express-checkout' ) ) ) );
-	add_settings_field( 'btn_size', __( 'Button Size', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_size', 'desc' => '', 'vals' => array( 'small', 'medium', 'large', 'responsive' ), 'texts' => array( __( 'Small', 'paypal-express-checkout' ), __( 'Medium', 'paypal-express-checkout' ), __( 'Large', 'paypal-express-checkout' ), __( 'Responsive', 'paypal-express-checkout' ) ) ) );
-	add_settings_field( 'btn_color', __( 'Button Color', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_color', 'desc' => '<div id="wp-ppdg-preview-container"><p>' . __( 'Button preview:', 'paypal-express-checkout' ) . '</p><br /><div id="paypal-button-container"></div><div id="wp-ppdg-preview-protect"></div></div>', 'vals' => array( 'gold', 'blue', 'silver', 'black' ), 'texts' => array( __( 'Gold', 'paypal-express-checkout' ), __( 'Blue', 'paypal-express-checkout' ), __( 'Silver', 'paypal-express-checkout' ), __( 'Black', 'paypal-express-checkout' ) ) ) );
+	add_settings_field( 'btn_layout', __( 'Button Layout', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_layout', 'desc' => __( '', 'paypal-express-checkout' ), 'vals' => array( 'vertical', 'horizontal' ), 'texts' => array( __( 'Vertical', 'paypal-express-checkout' ), __( 'Horizontal', 'paypal-express-checkout' ) ) ) );
+	add_settings_field( 'btn_height', __( 'Button Height', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_height', 'desc' => '', 'vals' => array( 'small', 'medium', 'large', 'xlarge' ), 'texts' => array( __( 'Small', 'paypal-express-checkout' ), __( 'Medium', 'paypal-express-checkout' ), __( 'Large', 'paypal-express-checkout' ), __( 'Extra Large', 'paypal-express-checkout' ) ) ) );
+	add_settings_field( 'btn_width', __( 'Button Width', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_width', 'desc' => __( 'Button width in pixels. Minimum width is 150px. Leave it blank for auto width.', 'paypal-express-checkout' ), 'size' => 10 ) );
+	add_settings_field( 'btn_color', __( 'Button Color', 'paypal-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-button-style-section', array( 'field' => 'btn_color', 'desc' => '<div id="wp-ppdg-preview-container"><p>' . __( 'Button preview:', 'paypal-express-checkout' ) . '</p><br /><div id="paypal-button-container"></div><div id="wp-ppdg-preview-protect"></div></div>', 'vals' => array( 'gold', 'blue', 'silver', 'white', 'black' ), 'texts' => array( __( 'Gold', 'paypal-express-checkout' ), __( 'Blue', 'paypal-express-checkout' ), __( 'Silver', 'paypal-express-checkout' ), __( 'White', 'paypal-express-checkout' ), __( 'Black', 'paypal-express-checkout' ) ) ) );
     }
 
     public function general_documentation_callback( $args ) {
@@ -189,6 +196,15 @@ class PPDG_Admin {
 	<?php
     }
 
+    public function disable_funding_note() {
+	echo '<p>';
+	_e( 'By default, funding source eligibility is smartly decided based on a variety of factors. You can force disable funding options by selecting them below.', 'paypal-express-checkout' );
+	echo '</p>';
+	echo '<p>';
+	_e( 'Note: disabled options will disappear from button preview once you save changes.', 'paypal-express-checkout' );
+	echo '</p>';
+    }
+
     /**
      * Settings HTML
      */
@@ -197,16 +213,22 @@ class PPDG_Admin {
 
 	extract( $args );
 
-	$field_value = esc_attr( isset( $settings[ $field ] ) ? $settings[ $field ] : '' );
+	$field_value = isset( $settings[ $field ] ) ? $settings[ $field ] : '';
 
 	if ( empty( $size ) )
 	    $size = 40;
 
 	switch ( $field ) {
 	    case 'is_live':
-		echo "<input type='checkbox' name='ppdg-settings[{$field}]' value='1' " . ($field_value ? 'checked=checked' : '') . " /><div style='font-size:11px;'>{$desc}</div>";
+		echo "<input type='checkbox' name='ppdg-settings[{$field}]' value='1' " . ($field_value ? 'checked=checked' : '') . " />";
 		break;
-	    case 'btn_size':
+	    case 'disabled_funding':
+	    case 'disabled_cards':
+		foreach ( $vals as $key => $value ) {
+		    echo '<label><input type="checkbox" id="wp-ppdg-' . $field . '"  name="ppdg-settings[' . $field . '][]" value="' . $value . '"' . (in_array( $value, $field_value ) ? ' checked' : '') . '>' . $texts[ $key ] . '</label> ';
+		}
+		break;
+	    case 'btn_height':
 	    case 'btn_color':
 	    case 'btn_type':
 	    case 'btn_shape':
@@ -217,14 +239,24 @@ class PPDG_Admin {
 		}
 		echo $opts;
 		echo '</select>';
-		echo $desc;
+		break;
+	    case 'btn_width':
+		echo '<input type="number" id="wp-ppdg-' . $field . '" class="wp-ppdg-button-style" placeholder="Auto" name="ppdg-settings[' . $field . ']" value="' . $field_value . '">';
+		break;
+	    case 'btn_layout':
+		foreach ( $vals as $key => $value ) {
+		    echo '<label><input type="radio" id="wp-ppdg-' . $field . '" class="wp-ppdg-button-style" name="ppdg-settings[' . $field . ']" value="' . $value . '"' . ($value === $field_value ? ' checked' : (empty( $field_value ) && $value === "vertical") ? ' checked' : '') . '>' . $texts[ $key ] . '</label> ';
+		}
 		break;
 	    default:
 		// case 'currency_code':
 		// case 'live_client_id':
 		// case 'sandbox_client_id':
-		echo "<input type='text' name='ppdg-settings[{$field}]' value='{$field_value}' size='{$size}' /> <div style='font-size:11px;'>{$desc}</div>";
+		echo "<input type='text' name='ppdg-settings[{$field}]' value='{$field_value}' size='{$size}' />";
 		break;
+	}
+	if ( $desc ) {
+	    echo "<p class='description'>{$desc}</p>";
 	}
     }
 
@@ -241,10 +273,15 @@ class PPDG_Admin {
 	else
 	    $output[ 'is_live' ]	 = 1;
 
-	$output[ 'btn_size' ]	 = $input[ 'btn_size' ];
+	$output[ 'btn_height' ]	 = $input[ 'btn_height' ];
+	$output[ 'btn_width' ]	 = $input[ 'btn_width' ];
+	$output[ 'btn_layout' ]	 = $input[ 'btn_layout' ];
 	$output[ 'btn_color' ]	 = $input[ 'btn_color' ];
 	$output[ 'btn_type' ]	 = $input[ 'btn_type' ];
 	$output[ 'btn_shape' ]	 = $input[ 'btn_shape' ];
+
+	$output[ 'disabled_funding' ]	 = empty( $input[ 'disabled_funding' ] ) ? array() : $input[ 'disabled_funding' ];
+	$output[ 'disabled_cards' ]	 = empty( $input[ 'disabled_cards' ] ) ? array() : $input[ 'disabled_cards' ];
 
 
 	if ( ! empty( $input[ 'currency_code' ] ) )

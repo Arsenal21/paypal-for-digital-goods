@@ -59,7 +59,7 @@ class PPDGShortcode {
     }
 
     private function show_err_msg( $msg ) {
-	return sprintf( '<div class="ppec-error-msg" style="color: red;">%s</div>', $msg );
+	return sprintf( '<div class="wp-ppec-error-msg" style="color: red;">%s</div>', $msg );
     }
 
     function shortcode_paypal_express_checkout( $atts ) {
@@ -79,9 +79,10 @@ class PPDGShortcode {
 	$title		 = get_the_title( $post_id );
 	$price		 = get_post_meta( $post_id, 'ppec_product_price', true );
 	$quantity	 = get_post_meta( $post_id, 'ppec_product_quantity', true );
+	$custom_quantity = get_post_meta( $post_id, 'ppec_product_custom_quantity', true );
 	$url		 = get_post_meta( $post_id, 'ppec_product_upload', true );
 	$content	 = get_the_content( null, false, $post_id );
-	$sc		 = sprintf( '[paypal_for_digital_goods name="%s" price="%s" quantity="%d" url="%s"]%s[/paypal_for_digital_goods]', $title, $price, $quantity, $url, $content );
+	$sc		 = sprintf( '[paypal_for_digital_goods name="%s" price="%s" quantity="%d" custom_quantity="%d" url="%s"]%s[/paypal_for_digital_goods]', $title, $price, $quantity, $custom_quantity, $url, $content );
 	$output		 = do_shortcode( $sc );
 	return $output;
     }
@@ -89,15 +90,18 @@ class PPDGShortcode {
     function shortcode_paypal_for_digital_goods( $atts, $content = "" ) {
 
 	extract( shortcode_atts( array(
-	    'name'		 => 'Item Name',
-	    'price'		 => '0',
-	    'quantity'	 => 1,
-	    'url'		 => '',
-	    'currency'	 => $this->ppdg->get_setting( 'currency_code' ),
-	    'btn_shape'	 => $this->ppdg->get_setting( 'btn_shape' ) !== false ? $this->ppdg->get_setting( 'btn_shape' ) : 'pill',
-	    'btn_type'	 => $this->ppdg->get_setting( 'btn_type' ) !== false ? $this->ppdg->get_setting( 'btn_type' ) : 'checkout',
-	    'btn_size'	 => $this->ppdg->get_setting( 'btn_size' ) !== false ? $this->ppdg->get_setting( 'btn_size' ) : 'small',
-	    'btn_color'	 => $this->ppdg->get_setting( 'btn_color' ) !== false ? $this->ppdg->get_setting( 'btn_color' ) : 'gold',
+	    'name'			 => 'Item Name',
+	    'price'			 => '0',
+	    'quantity'		 => 1,
+	    'url'			 => '',
+	    'custom_quantity'	 => 0,
+	    'currency'		 => $this->ppdg->get_setting( 'currency_code' ),
+	    'btn_shape'		 => $this->ppdg->get_setting( 'btn_shape' ) !== false ? $this->ppdg->get_setting( 'btn_shape' ) : 'pill',
+	    'btn_type'		 => $this->ppdg->get_setting( 'btn_type' ) !== false ? $this->ppdg->get_setting( 'btn_type' ) : 'checkout',
+	    'btn_height'		 => $this->ppdg->get_setting( 'btn_height' ) !== false ? $this->ppdg->get_setting( 'btn_height' ) : 'small',
+	    'btn_width'		 => $this->ppdg->get_setting( 'btn_width' ) !== false ? $this->ppdg->get_setting( 'btn_width' ) : 0,
+	    'btn_layout'		 => $this->ppdg->get_setting( 'btn_layout' ) !== false ? $this->ppdg->get_setting( 'btn_layout' ) : 'horizontal',
+	    'btn_color'		 => $this->ppdg->get_setting( 'btn_color' ) !== false ? $this->ppdg->get_setting( 'btn_color' ) : 'gold',
 	), $atts ) );
 	if ( empty( $url ) ) {
 	    $err_msg = __( "Please specify a digital url for your product", 'paypal-express-checkout' );
@@ -108,12 +112,19 @@ class PPDGShortcode {
 	$button_id		 = 'paypal_button_' . count( self::$payment_buttons );
 	self::$payment_buttons[] = $button_id;
 
+	$quantity = empty( $quantity ) ? 1 : $quantity;
+
 	$trans_name = 'wp-ppdg-' . sanitize_title_with_dashes( $name ); //Create key using the item name.
 
-	set_transient( $trans_name . '-price', $price, 2 * 3600 ); //Save the price for this item for 2 hours.
-	set_transient( $trans_name . '-currency', $currency, 2 * 3600 );
-	set_transient( $trans_name . '-quantity', $quantity, 2 * 3600 );
-	set_transient( $trans_name . '-url', $url, 2 * 3600 );
+	$trans_data = array(
+	    'price'			 => $price,
+	    'currency'		 => $currency,
+	    'quantity'		 => $quantity,
+	    'url'			 => $url,
+	    'custom_quantity'	 => $custom_quantity,
+	);
+
+	set_transient( $trans_name, $trans_data, 2 * 3600 );
 
 	$is_live = $this->ppdg->get_setting( 'is_live' );
 
@@ -131,56 +142,74 @@ class PPDGShortcode {
 	    return $err;
 	}
 
-	$quantity = empty( $quantity ) ? 1 : $quantity;
+	$btn_sizes = array( 'small' => 25, 'medium' => 35, 'large' => 45, 'xlarge' => 55 );
+
+	if ( isset( $btn_sizes[ $btn_height ] ) ) {
+	    $btn_height = $btn_sizes[ $btn_height ];
+	} else {
+	    $btn_height = 25;
+	}
 
 	$output = '';
+
+	$output .= '<div style="position: relative;" class="wp-ppec-shortcode-container" data-ppec-button-id="' . $button_id . '">'
+	. '<div class="wp-ppec-overlay" data-ppec-button-id="' . $button_id . '">'
+	. '<div class="wp-ppec-spinner">'
+	. '<div></div>'
+	. '<div></div>'
+	. '<div></div>'
+	. '<div></div>'
+	. '</div>'
+	. '</div>';
 
 	if ( count( self::$payment_buttons ) <= 1 ) {
 	    // insert the below only once on a page
 	    ob_start();
+
+	    $frontVars		 = array(
+		'str'		 => array(
+		    'errorOccurred'	 => __( 'Error occurred', 'paypal-express-checkout' ),
+		    'paymentFor'	 => __( 'Payment for', 'paypal-express-checkout' ),
+		    'enterQuantity'	 => __( 'Please enter valid quantity', 'paypal-express-checkout' ),
+		),
+		'ajaxUrl'	 => get_admin_url() . 'admin-ajax.php'
+	    );
+	    ?>
+	    <script>var ppecFrontVars = <?php echo json_encode( $frontVars ); ?>;</script>
+	    <?php
+	    $args			 = array();
+	    $args[ 'client-id' ]	 = $client_id;
+	    $args[ 'intent' ]	 = 'capture';
+	    $disabled_funding	 = $this->ppdg->get_setting( 'disabled_funding' );
+	    if ( ! empty( $disabled_funding ) ) {
+		$arg = '';
+		foreach ( $disabled_funding as $funding ) {
+		    $arg .= $funding . ',';
+		}
+		$arg				 = rtrim( $arg, ',' );
+		$args[ 'disable-funding' ]	 = $arg;
+	    }
+	    //check if cards aren't disabled globally first
+	    if ( ! in_array( 'card', $disabled_funding ) ) {
+		$disabled_cards = $this->ppdg->get_setting( 'disabled_cards' );
+		if ( ! empty( $disabled_cards ) ) {
+		    $arg = '';
+		    foreach ( $disabled_cards as $card ) {
+			$arg .= $card . ',';
+		    }
+		    $arg			 = rtrim( $arg, ',' );
+		    $args[ 'disable-card' ]	 = $arg;
+		}
+	    }
+	    $script_url	 = add_query_arg( $args, 'https://www.paypal.com/sdk/js' );
+	    printf( '<script src="%s"></script>', $script_url );
 	    ?>
 	    <div id="wp-ppdg-dialog-message" title="">
 	        <p id="wp-ppdg-dialog-msg"></p>
 	    </div>
-	    <script src="https://www.paypalobjects.com/api/checkout.js"></script>
-	    <script>
-	        function wp_ppdg_process_payment(payment) {
-	    	//	    	console.log("payment details:");
-	    	//	    	console.log(payment);
-	    	jQuery.post("<?php echo get_admin_url(); ?>admin-ajax.php", {action: "wp_ppdg_process_payment", wp_ppdg_payment: payment})
-	    		.done(function (data) {
-	    		    var ret = true;
-	    		    try {
-	    			var res = JSON.parse(data);
-	    			dlgTitle = res.title;
-	    			dlgMsg = res.msg;
-	    		    } catch (e) {
-	    			dlgTitle = "<?php _e( 'Error occurred', 'paypal-express-checkout' ); ?>";
-	    			dlgMsg = data;
-	    			ret = false;
-	    		    }
-	    		    jQuery('div#wp-ppdg-dialog-message').attr('title', dlgTitle);
-	    		    jQuery('p#wp-ppdg-dialog-msg').html(dlgMsg);
-	    		    jQuery("#wp-ppdg-dialog-message").dialog({
-	    			modal: true,
-	    			buttons: {
-	    			    Ok: function () {
-	    				jQuery(this).dialog("close");
-	    			    }
-	    			}
-	    		    });
-	    		    return ret;
-	    		});
-	        }
-	    </script>
 	    <?php
-	    $output .= ob_get_clean();
+	    $output		 .= ob_get_clean();
 	}
-
-	wp_enqueue_script( 'jquery-ui-dialog' );
-	wp_enqueue_style( 'wp-ppdg-jquery-ui-style' );
-
-	ob_start();
 
 	//output content if needed
 
@@ -195,64 +224,44 @@ class PPDGShortcode {
 	}
 	$content = wpautop( do_shortcode( $content ) );
 	$output	 .= $content;
-	?>
-	<div id="<?php echo $button_id; ?>"></div>
 
-	<script>
-	    paypal.Button.render({
+	//custom quantity
+	if ( $custom_quantity ) {
+	    $output	 .= '<label>Quantity:</label>';
+	    $output	 .= '<input id="wp-ppec-custom-quantity" data-ppec-button-id="' . $button_id . '" type="number" name="custom-quantity" class="wp-ppec-input wp-ppec-custom-quantity" min="1" value="' . $quantity . '">';
+	    $output	 .= '<div class="wp-ppec-form-error-msg"></div>';
+	}
 
-		env: '<?php echo $env; ?>',
-		client: {
-	<?php echo $env; ?>: '<?php echo $client_id; ?>',
-		},
+	$output .= '<div class = "wp-ppec-button-container">';
 
-		style: {
-		    tagline: false,
-		    branding: true,
-		    shape: '<?php echo $btn_shape; ?>',
-		    label: '<?php echo $btn_type; ?>',
-		    size: '<?php echo $btn_size; ?>',
-		    color: '<?php echo $btn_color; ?>'
-		},
+	$output .= sprintf( '<div id = "%s"style = "margin: 0 auto;%s"></div>  ', $button_id, $btn_width ? ' width: ' . $btn_width . 'px;
+	    ' : '' );
 
-		commit: true,
+	$output .= '</div>';
 
-		payment: function (data, actions) {
-		    return actions.payment.create({
-			payment: {
-			    intent: 'sale',
-			    transactions: [
-				{
-				    amount: {total: '<?php echo $price * $quantity; ?>', currency: '<?php echo $currency; ?>'},
-				    description: '<?php echo sprintf( __( 'Payment for %s' ), esc_js( $name ) ); ?>',
-				    item_list: {
-					items: [
-					    {
-						name: '<?php echo esc_js( $name ); ?>',
-						quantity: '<?php echo $quantity; ?>',
-						price: '<?php echo $price; ?>',
-						currency: '<?php echo $currency; ?>'
-					    }
-					]
-				    }
-				}
-			    ]
-			}
-		    });
-		},
-		onAuthorize: function (data, actions) {
-		    return actions.payment.execute().then(function (payment) {
-			return wp_ppdg_process_payment(payment);
-		    });
-		},
-		onError: function (err) {
-		    alert(err);
-		}
+	$data = array(
+	    'id'			 => $button_id,
+	    'env'			 => $env,
+	    'client_id'		 => $client_id,
+	    'price'			 => $price,
+	    'quantity'		 => $quantity,
+	    'custom_quantity'	 => $custom_quantity,
+	    'currency'		 => $currency,
+	    'name'			 => $name,
+	    'btnStyle'		 => array(
+		'height' => $btn_height,
+		'shape'	 => $btn_shape,
+		'label'	 => $btn_type,
+		'color'	 => $btn_color,
+		'layout' => $btn_layout,
+	    ),
+	);
 
-	    }, '#<?php echo $button_id; ?>');
-	</script>
-	<?php
-	$output	 .= ob_get_clean();
+
+	$output .= '<script>jQuery(document).ready(function() {new ppecHandler(' . json_encode( $data ) . ')});</script>';
+
+	$output .= '</div>';
+
 	return $output;
     }
 

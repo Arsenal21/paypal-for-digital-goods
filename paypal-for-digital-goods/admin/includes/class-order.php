@@ -122,11 +122,10 @@ class OrdersPPDG {
 	$output .= "\n\n";
 
 	$output	 .= __( "<h2>Customer Details</h2>" ) . "\n";
-	$output	 .= __( "Name: " ) . $payer[ 'payer_info' ][ 'first_name' ] . ' ' . $payer[ 'payer_info' ][ 'last_name' ] . "\n";
-	$output	 .= __( "Payer ID: " ) . $payer[ 'payer_info' ][ 'payer_id' ] . "\n";
-	$output	 .= __( "Payer Status: " ) . $payer[ 'status' ] . "\n";
-	$output	 .= __( "E-Mail Address: " ) . $payer[ 'payer_info' ][ 'email' ] . "\n";
-	$output	 .= __( "Country Code: " ) . $payer[ 'payer_info' ][ 'country_code' ] . "\n";
+	$output	 .= __( "Name: " ) . $payer[ 'name' ][ 'given_name' ] . ' ' . $payer[ 'name' ][ 'surname' ] . "\n";
+	$output	 .= __( "Payer ID: " ) . $payer[ 'payer_id' ] . "\n";
+	$output	 .= __( "E-Mail Address: " ) . $payer[ 'email_address' ] . "\n";
+	$output	 .= __( "Country Code: " ) . $payer[ 'address' ][ 'country_code' ] . "\n";
 
 	$post[ 'post_content' ]	 = $output; //..var_export($ConfirmPayment_details, true)'<br/><br/>'.var_export($EC_details, true);
 	$post[ 'post_type' ]	 = 'ppdgorder';

@@ -68,7 +68,16 @@ class PPDG {
     }
 
     public function enqueue_styles() {
-	wp_register_style( 'wp-ppdg-jquery-ui-style', WP_PPEC_PLUGIN_URL . '/public/assets/css/smoothness/jquery-ui.min.css' );
+	wp_register_script( 'wp-ppec-frontend-script', WP_PPEC_PLUGIN_URL . '/public/assets/js/public.js', array( 'jquery' ), false, true );
+
+	wp_register_style( 'wp-ppec-jquery-ui-style', WP_PPEC_PLUGIN_URL . '/public/assets/css/smoothness/jquery-ui.min.css' );
+	wp_register_style( 'wp-ppec-frontend-style', WP_PPEC_PLUGIN_URL . '/public/assets/css/public.css' );
+
+	wp_enqueue_script( 'jquery-ui-dialog' );
+	wp_enqueue_script( 'wp-ppec-frontend-script' );
+
+	wp_enqueue_style( 'wp-ppec-jquery-ui-style' );
+	wp_enqueue_style( 'wp-ppec-frontend-style' );
     }
 
     public function get_setting( $field ) {
@@ -219,17 +228,45 @@ class PPDG {
      */
     private static function single_activate() {
 	// Check if its a first install
-	$default		 = array(
-	    'is_live'	 => 0,
-	    'currency_code'	 => 'USD',
-	    'btn_shape'	 => 'pill',
-	    'btn_color'	 => 'gold',
-	    'btn_type'	 => 'checkout',
-	    'btn_size'	 => 'small',
+	$default	 = array(
+	    'is_live'		 => 0,
+	    'currency_code'		 => 'USD',
+	    'btn_shape'		 => 'pill',
+	    'btn_color'		 => 'gold',
+	    'btn_type'		 => 'checkout',
+	    'btn_height'		 => 'xlarge',
+	    'btn_width'		 => 0,
+	    'btn_layout'		 => 'vertical',
+	    'disabled_funding'	 => array(),
+	    'disabled_cards'	 => array(),
 	);
-	$alreadyInstalled	 = get_option( 'ppdg-settings' );
-	if ( empty( $alreadyInstalled ) ) {
+	$settings	 = get_option( 'ppdg-settings' );
+	if ( empty( $settings ) ) {
 	    add_option( 'ppdg-settings', $default );
+	} else {
+	    $settings = array_merge( $default, $settings );
+	    //replace unsupported btn_size option if it's set
+	    if ( isset( $settings[ 'btn_size' ] ) ) {
+		switch ( $settings[ 'btn_size' ] ) {
+		    case 'small':
+			$settings[ 'btn_height' ]	 = 'small';
+			$settings[ 'btn_width' ]	 = 150;
+			break;
+		    case 'medium':
+			$settings[ 'btn_height' ]	 = 'medium';
+			$settings[ 'btn_width' ]	 = 250;
+			break;
+		    case 'medium':
+			$settings[ 'btn_height' ]	 = 'large';
+			$settings[ 'btn_width' ]	 = 350;
+			break;
+		    case 'responsive':
+			$settings[ 'btn_height' ]	 = 'xlarge';
+			$settings[ 'btn_width' ]	 = 0;
+			break;
+		}
+	    }
+	    update_option( 'ppdg-settings', $settings );
 	}
     }
 

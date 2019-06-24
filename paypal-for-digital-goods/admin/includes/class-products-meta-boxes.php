@@ -37,13 +37,19 @@ class PPECProductsMetaboxes {
     }
 
     function display_quantity_meta_box( $post ) {
-	$current_val	 = get_post_meta( $post->ID, 'ppec_product_quantity', true );
-	$current_val	 = empty( $current_val ) ? 1 : $current_val;
+	$current_val		 = get_post_meta( $post->ID, 'ppec_product_quantity', true );
+	$current_val		 = empty( $current_val ) ? 1 : $current_val;
+	$allow_custom_quantity	 = get_post_meta( $post->ID, 'ppec_product_custom_quantity', true );
 	?>
 	<label><?php _e( 'Quantity', 'stripe-payments' ); ?></label>
 	<br/>
 	<input type="number" name="ppec_product_quantity" value="<?php echo $current_val; ?>">
-	<p class="description"><?php echo __( 'Item quantity', 'paypal-express-checkout' ); ?></p>
+	<p class="description"><?php echo __( 'Item quantity.', 'paypal-express-checkout' ); ?></p>
+	<label>
+	    <input type="checkbox" name="ppec_product_custom_quantity" value="1"<?php echo $allow_custom_quantity ? ' checked' : ''; ?>>
+	    <?php echo __( 'Allow customers to specify quantity', 'paypal-express-checkout' ); ?>
+	</label>
+	<p class="description"><?php echo __( "When checked, customers can enter quantity they want to buy. You can set initial quantity using field above.", 'paypal-express-checkout' ); ?></p>
 	<?php
     }
 
@@ -150,6 +156,10 @@ class PPECProductsMetaboxes {
 	$quantity	 = filter_input( INPUT_POST, 'ppec_product_quantity', FILTER_SANITIZE_NUMBER_INT );
 	$quantity	 = empty( $quantity ) ? 1 : $quantity;
 	update_post_meta( $post_id, 'ppec_product_quantity', $quantity );
+
+	//allow custom quantity
+	$quantity = filter_input( INPUT_POST, 'ppec_product_custom_quantity', FILTER_SANITIZE_NUMBER_INT );
+	update_post_meta( $post_id, 'ppec_product_custom_quantity', $quantity );
     }
 
 }

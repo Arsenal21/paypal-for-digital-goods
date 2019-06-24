@@ -81,13 +81,31 @@ class PPDGShortcode {
 	$quantity	 = get_post_meta( $post_id, 'ppec_product_quantity', true );
 	$custom_quantity = get_post_meta( $post_id, 'ppec_product_custom_quantity', true );
 	$url		 = get_post_meta( $post_id, 'ppec_product_upload', true );
-	$content	 = get_the_content( null, false, $post_id );
-	$sc		 = sprintf( '[paypal_for_digital_goods name="%s" price="%s" quantity="%d" custom_quantity="%d" url="%s"]%s[/paypal_for_digital_goods]', $title, $price, $quantity, $custom_quantity, $url, $content );
-	$output		 = do_shortcode( $sc );
+	$content	 = $post->post_content;
+
+	$output = '';
+
+	//output content if needed
+	if ( ! empty( $content ) ) {
+	    global $wp_embed;
+	    if ( isset( $wp_embed ) && is_object( $wp_embed ) ) {
+		if ( method_exists( $wp_embed, 'autoembed' ) ) {
+		    $content = $wp_embed->autoembed( $content );
+		}
+		if ( method_exists( $wp_embed, 'run_shortcode' ) ) {
+		    $content = $wp_embed->run_shortcode( $content );
+		}
+	    }
+	    $content = wpautop( do_shortcode( $content ) );
+	    $output	 .= $content;
+	}
+
+	$sc	 = sprintf( '[paypal_for_digital_goods name="%s" price="%s" quantity="%d" custom_quantity="%d" url="%s"]', $title, $price, $quantity, $custom_quantity, $url );
+	$output	 .= do_shortcode( $sc );
 	return $output;
     }
 
-    function shortcode_paypal_for_digital_goods( $atts, $content = "" ) {
+    function shortcode_paypal_for_digital_goods( $atts ) {
 
 	extract( shortcode_atts( array(
 	    'name'			 => 'Item Name',
@@ -210,20 +228,6 @@ class PPDGShortcode {
 	    <?php
 	    $output		 .= ob_get_clean();
 	}
-
-	//output content if needed
-
-	global $wp_embed;
-	if ( isset( $wp_embed ) && is_object( $wp_embed ) ) {
-	    if ( method_exists( $wp_embed, 'autoembed' ) ) {
-		$content = $wp_embed->autoembed( $content );
-	    }
-	    if ( method_exists( $wp_embed, 'run_shortcode' ) ) {
-		$content = $wp_embed->run_shortcode( $content );
-	    }
-	}
-	$content = wpautop( do_shortcode( $content ) );
-	$output	 .= $content;
 
 	//custom quantity
 	if ( $custom_quantity ) {

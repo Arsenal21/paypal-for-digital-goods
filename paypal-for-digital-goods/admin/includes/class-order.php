@@ -122,7 +122,7 @@ class OrdersPPDG {
 	$output .= "\n\n";
 
 	$output	 .= __( "<h2>Customer Details</h2>" ) . "\n";
-	$output	 .= __( "Name: " ) . $payer[ 'name' ][ 'given_name' ] . ' ' . $payer[ 'name' ][ 'last_name' ] . "\n";
+	$output	 .= __( "Name: " ) . $payer[ 'name' ][ 'given_name' ] . ' ' . $payer[ 'name' ][ 'surname' ] . "\n";
 	$output	 .= __( "Payer ID: " ) . $payer[ 'payer_id' ] . "\n";
 	$output	 .= __( "E-Mail Address: " ) . $payer[ 'email_address' ] . "\n";
 	$output	 .= __( "Country Code: " ) . $payer[ 'address' ][ 'country_code' ] . "\n";

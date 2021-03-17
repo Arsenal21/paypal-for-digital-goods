@@ -12,6 +12,8 @@ Allows you to use the PayPal Express Checkout API to accept payment for a digita
 
 == Description ==
 
+Please use the new [WP Express Checkout plugin](https://wordpress.org/plugins/wp-express-checkout/) which has been created to handle the PayPal API for both digital and normal products.
+
 This plugin provides you a shortcode to generate a customizable PayPal payment button that allows a user to pay for an item instantly in a popup using the PayPal's Express Checkout API/Gateway.
 
 The full checkout takes place in an overlay/popup window and the customer never leaves your site.
